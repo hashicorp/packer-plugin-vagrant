@@ -1,10 +1,10 @@
 ---
 description: |
-    The Vagrant Cloud post-processor enables the upload of Vagrant boxes to
-    Vagrant Cloud.
+  The Vagrant Cloud post-processor enables the upload of Vagrant boxes to
+  Vagrant Cloud.
 layout: docs
-page_title: 'Vagrant Cloud - Post-Processors'
-sidebar_current: 'docs-post-processors-vagrant-cloud'
+page_title: Vagrant Cloud - Post-Processors
+sidebar_current: docs-post-processors-vagrant-cloud
 ---
 
 # Vagrant Cloud Post-Processor
@@ -54,59 +54,58 @@ on Vagrant Cloud, as well as authentication and version information.
 
 ### Required:
 
--   `box_tag` (string) - The shorthand tag for your box that maps to Vagrant
-    Cloud, for example `hashicorp/precise64`, which is short for
-    `vagrantcloud.com/hashicorp/precise64`.
+- `box_tag` (string) - The shorthand tag for your box that maps to Vagrant
+  Cloud, for example `hashicorp/precise64`, which is short for
+  `vagrantcloud.com/hashicorp/precise64`.
 
--   `version` (string) - The version number, typically incrementing a previous
-    version. The version string is validated based on [Semantic
-    Versioning](http://semver.org/). The string must match a pattern that could
-    be semver, and doesn't validate that the version comes after your previous
-    versions.
+- `version` (string) - The version number, typically incrementing a previous
+  version. The version string is validated based on [Semantic
+  Versioning](http://semver.org/). The string must match a pattern that could
+  be semver, and doesn't validate that the version comes after your previous
+  versions.
 
--   `access_token` (string) - Your access token for the Vagrant Cloud API. This
-    can be generated on your [tokens
-    page](https://app.vagrantup.com/settings/security). If not specified, the
-    environment will be searched. First, `VAGRANT_CLOUD_TOKEN` is checked, and
-    if nothing is found, finally `ATLAS_TOKEN` will be used. This is required
-    unless you are using a private hosting solution (i.e. `vagrant_cloud_url`
-    has been populated).
+- `access_token` (string) - Your access token for the Vagrant Cloud API. This
+  can be generated on your [tokens
+  page](https://app.vagrantup.com/settings/security). If not specified, the
+  environment will be searched. First, `VAGRANT_CLOUD_TOKEN` is checked, and
+  if nothing is found, finally `ATLAS_TOKEN` will be used. This is required
+  unless you are using a private hosting solution (i.e. `vagrant_cloud_url`
+  has been populated).
 
-    **or**
+  **or**
 
--   `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud.
-    This is useful if you're using Vagrant Private Cloud in your own network.
-    Defaults to `https://vagrantcloud.com/api/v1`. If this value is set to something
-    other than the default then `access_token` can be left blank and no
-    `Authorization` header will be added to requests sent by this post-processor.
-
+- `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud.
+  This is useful if you're using Vagrant Private Cloud in your own network.
+  Defaults to `https://vagrantcloud.com/api/v1`. If this value is set to something
+  other than the default then `access_token` can be left blank and no
+  `Authorization` header will be added to requests sent by this post-processor.
 
 ### Optional:
 
--   `no_release` (string) - If set to true, does not release the version on
-    Vagrant Cloud, making it active. You can manually release the version via
-    the API or Web UI. Defaults to false.
+- `no_release` (string) - If set to true, does not release the version on
+  Vagrant Cloud, making it active. You can manually release the version via
+  the API or Web UI. Defaults to false.
 
--   `insecure_skip_tls_verify` (boolean) - If set to true *and* `vagrant_cloud_url`
-    is set to something different than its default, it will set TLS InsecureSkipVerify
-    to true. In other words, this will disable security checks of SSL. You may need
-    to set this option to true if your host at vagrant_cloud_url is using a
-    self-signed certificate.
+- `insecure_skip_tls_verify` (boolean) - If set to true _and_ `vagrant_cloud_url`
+  is set to something different than its default, it will set TLS InsecureSkipVerify
+  to true. In other words, this will disable security checks of SSL. You may need
+  to set this option to true if your host at vagrant_cloud_url is using a
+  self-signed certificate.
 
--   `keep_input_artifact` (boolean) - When true, preserve the local box
-    after uploading to Vagrant cloud. Defaults to `true`.
+- `keep_input_artifact` (boolean) - When true, preserve the local box
+  after uploading to Vagrant cloud. Defaults to `true`.
 
--   `version_description` (string) - Optionally markdown text used as a
-    full-length and in-depth description of the version, typically for denoting
-    changes introduced
+- `version_description` (string) - Optionally markdown text used as a
+  full-length and in-depth description of the version, typically for denoting
+  changes introduced
 
--   `box_download_url` (string) - Optional URL for a self-hosted box. If this
-    is set the box will not be uploaded to the Vagrant Cloud.
-    This is a [template engine](/docs/templates/engine.html). Therefore, you
-    may use user variables and template functions in this field.
-    The following extra variables are also avilable in this engine:
-     * `Provider`: The Vagrant provider the box is for
-     * `ArtifactId`: The ID of the input artifact.
+- `box_download_url` (string) - Optional URL for a self-hosted box. If this
+  is set the box will not be uploaded to the Vagrant Cloud.
+  This is a [template engine](/docs/templates/engine.html). Therefore, you
+  may use user variables and template functions in this field.
+  The following extra variables are also avilable in this engine:
+  - `Provider`: The Vagrant provider the box is for
+  - `ArtifactId`: The ID of the input artifact.
 
 ## Use with the Vagrant Post-Processor
 
@@ -170,7 +169,7 @@ Additional files bundled by the Artifice post-processor will be ignored.
 ```json
 {
   "variables": {
-    "cloud_token": "{{ env `VAGRANT_CLOUD_TOKEN` }}",
+    "cloud_token": "{{ env `VAGRANT_CLOUD_TOKEN` }}"
   },
 
   "builders": [
@@ -188,15 +187,13 @@ Additional files bundled by the Artifice post-processor will be ignored.
     [
       {
         "type": "artifice",
-        "files": [
-          "./path/to/my.box"
-        ]
+        "files": ["./path/to/my.box"]
       },
       {
         "type": "vagrant-cloud",
         "box_tag": "myorganisation/mybox",
         "access_token": "{{user `cloud_token`}}",
-        "version": "0.1.0",
+        "version": "0.1.0"
       }
     ]
   ]
