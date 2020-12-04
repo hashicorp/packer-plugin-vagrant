@@ -125,22 +125,25 @@ how to do this:
 
 ```json
 {
-  "builders": [{
-    "type": "null",
-    "communicator": "none"
-  }],
+  "builders": [
+    {
+      "type": "null",
+      "communicator": "none"
+    }
+  ],
   "post-processors": [
     [
       {
         "type": "artifice",
-        "files": ["output-virtualbox-iso/vbox-example-disk001.vmdk",
-              "output-virtualbox-iso/vbox-example.ovf"
-          ]
+        "files": [
+          "output-virtualbox-iso/vbox-example-disk001.vmdk",
+          "output-virtualbox-iso/vbox-example.ovf"
+        ]
       },
       {
         "type": "vagrant",
         "keep_input_artifact": true,
-        "provider_override": "virtualbox",
+        "provider_override": "virtualbox"
       }
     ]
   ]
