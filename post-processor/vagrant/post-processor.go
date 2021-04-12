@@ -21,7 +21,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
-	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -217,7 +216,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 
 	provider := providerForName(name)
 	if provider == nil {
-		if artifact.BuilderId() == artifice.BuilderId {
+		if artifact.BuilderId() == "packer.post-processor.artifice" {
 			return nil, false, false, fmt.Errorf(
 				"Unknown provider type: When using an artifact created by " +
 					"the artifice post-processor, you need to set the " +
