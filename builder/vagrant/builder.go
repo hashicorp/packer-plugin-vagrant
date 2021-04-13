@@ -1,5 +1,5 @@
-//go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type Config
+//go:generate packer-sdc struct-markdown
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
 package vagrant
 
@@ -24,8 +24,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
-// Builder implements packersdk.Builder and builds the actual VirtualBox
-// images.
 type Builder struct {
 	config Config
 	runner multistep.Runner
