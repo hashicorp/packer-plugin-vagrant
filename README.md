@@ -1,20 +1,6 @@
 # Packer Plugin Vagrant
-
-The `vagrant` multi-component plugin can be used with HashiCorp [Packer](https://www.packer.io)
-to create custom images.
-
-This plugin is designed to help integrate Packer with [Vagrant](https://www.vagrantup.com/).
-
-It contains three components.
-
-### Builders
-
-- The `vagrant` builder launches, modifies, and saves a Vagrant box.
-
-### Post-Processors
-
-- The `vagrant` post-processor packages your build artifact into a Vagrant box.
-- The `vagrant-cloud` post-processor pushes your Vagrant box to the cloud.
+The `Vagrant` multi-component plugin can be used with HashiCorp [Packer](https://www.packer.io)
+to create custom images. For the full list of available features for this plugin see [docs](docs).
 
 ## Installation
 
