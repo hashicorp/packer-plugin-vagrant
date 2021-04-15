@@ -1,25 +1,7 @@
-# Scaffolding Plugins
+# Vagrant Plugin
 
-<!--
-  Include a short overview about the plugin.
+The Vagrant plugin integrates Packer with HashiCorp [Vagrant](https://www.vagrantup.com/), allowing you to use Packer to create development boxes.
 
-  This document is a great location for creating a table of contents for each
-  of the components the plugin may provide. This document should load automatically
-  when navigating to the docs directory for a plugin.
+- [builder](/docs/builders/vagrant.mdx) - The Vagrant builder is intended for building new boxes from already-existing boxes.
 
--->
-
-The Scaffolding plugin is intended as a starting point for creating Packer plugins, containing:
-
-- [builder](/docs/builders/builder-name.mdx) - The scaffolding builder is used to create endless Packer
-  plugins using a consistent plugin structure.
-
-- [provisioner](/docs/provisioners/provisioner-name.mdx) - The scaffolding provisioner is used to provisioner
-  Packer builds.
-
-- [post-processor](/docs/post-processors/postprocessor-name.mdx) - The scaffolding post-processor is used to
-  export scaffolding builds.
-
-- [data source](/docs/datasources/datasource-name.mdx) - The scaffolding data source is used to
-  export scaffolding data.
-
+- [post-processor](/docs/post-processors/vagrant.mdx) - The Packer Vagrant post-processor takes a build and converts the artifact into a valid Vagrant box.
