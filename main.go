@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
-	vagrantB "packer-plugin-vagrant/builder/vagrant"
-	vagrantPP "packer-plugin-vagrant/post-processor/vagrant"
-	vagrantCloudPP "packer-plugin-vagrant/post-processor/vagrant-cloud"
+
+	vagrantB "github.com/hashicorp/packer-plugin-vagrant/builder/vagrant"
+	vagrantPP "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant"
+	vagrantCloudPP "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant-cloud"
 
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer-plugin-sdk/version"
