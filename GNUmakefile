@@ -34,3 +34,7 @@ generate: ## install-gen-deps
 	## Takes generated partials and renders single markdown files.
 	packer-sdc renderdocs -src content-files/docs -partials docs-partials -dst docs/
 
+ci-release-docs:
+	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@latest
+	@packer-sdc renderdocs -src docs -partials docs-partials/ -dst docs/
+	@/bin/sh -c "[ -d docs ] && zip -r docs.zip docs/"
