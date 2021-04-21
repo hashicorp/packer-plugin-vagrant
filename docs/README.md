@@ -5,3 +5,5 @@ The Vagrant plugin integrates Packer with HashiCorp [Vagrant](https://www.vagran
 - [builder](/docs/builders/vagrant.mdx) - The Vagrant builder is intended for building new boxes from already-existing boxes.
 
 - [post-processor](/docs/post-processors/vagrant.mdx) - The Packer Vagrant post-processor takes a build and converts the artifact into a valid Vagrant box.
+
+- [post-processor](/docs/post-processors/vagrant.mdx) - The Packer vagrant-cloud post-processor takes a Vagrant box artifact and uploads it to [Vagrant Cloud](https://app.vagrantup.com/boxes/search)
