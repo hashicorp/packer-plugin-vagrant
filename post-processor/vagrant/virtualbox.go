@@ -159,8 +159,8 @@ func DecompressOva(dir, src string) error {
 			}
 			defer output.Close()
 
-			os.Chmod(path, info.Mode())
-			os.Chtimes(path, hdr.AccessTime, hdr.ModTime)
+			_ = os.Chmod(path, info.Mode())
+			_ = os.Chtimes(path, hdr.AccessTime, hdr.ModTime)
 			_, err = io.Copy(output, tarReader)
 			return err
 		}()

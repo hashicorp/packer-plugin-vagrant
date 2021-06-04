@@ -240,7 +240,7 @@ func TestPostProcessor_PostProcess_checkArtifactType(t *testing.T) {
 	config["vagrant_cloud_url"] = server.URL
 	var p PostProcessor
 
-	p.Configure(config)
+	_ = p.Configure(config)
 	_, _, _, err := p.PostProcess(context.Background(), testUi(), artifact)
 	if !strings.Contains(err.Error(), "Unknown artifact type") {
 		t.Fatalf("Should error with message 'Unknown artifact type...' with BuilderId: %s", artifact.BuilderIdValue)
@@ -259,7 +259,7 @@ func TestPostProcessor_PostProcess_checkArtifactFileIsBox(t *testing.T) {
 	config["vagrant_cloud_url"] = server.URL
 	var p PostProcessor
 
-	p.Configure(config)
+	_ = p.Configure(config)
 	_, _, _, err := p.PostProcess(context.Background(), testUi(), artifact)
 	if !strings.Contains(err.Error(), "Unknown files in artifact") {
 		t.Fatalf("Should error with message 'Unknown files in artifact...' with artifact file: %s",
