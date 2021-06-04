@@ -78,7 +78,8 @@ func (d *Vagrant_2_2_Driver) Package(args []string) error {
 	// https://github.com/vagrant-libvirt/vagrant-libvirt/issues/765
 	// is fixed.
 	oldDir, _ := os.Getwd()
-	os.Chdir(d.VagrantCWD)
+	_ = os.Chdir(d.VagrantCWD)
+	//nolint
 	defer os.Chdir(oldDir)
 	args = append(args, "--output", "package.box")
 	_, _, err := d.vagrantCmd(append([]string{"package"}, args...)...)
@@ -266,7 +267,7 @@ func (d *Vagrant_2_2_Driver) vagrantCmd(args ...string) (string, string, error) 
 		log.Printf("[vagrant driver] stdout: %s", line)
 		stdoutString += line + "\n"
 	}
-	cmd.Wait()
+	_ = cmd.Wait()
 
 	if _, ok := err.(*exec.ExitError); ok {
 		err = fmt.Errorf("Vagrant error: %s", stderrString)
