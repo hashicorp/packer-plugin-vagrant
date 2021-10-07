@@ -115,6 +115,16 @@ on Vagrant Cloud, as well as authentication and version information.
   - `Provider`: The Vagrant provider the box is for
   - `ArtifactId`: The ID of the input artifact.
 
+- `box_checksum` (string) - Optional checksum for the provider .box file.
+  The type of the checksum is specified within the checksum field as a prefix,
+  ex: "md5:{$checksum}". Valid values are:
+  - null or ""
+  - "md5:{$checksum}"
+  - "sha1:{$checksum}"
+  - "sha256:{$checksum}"
+  - "sha512:{$checksum}"
+  See https://www.vagrantup.com/vagrant-cloud/api#arguments-7
+
 - `no_direct_upload` (boolean) - When `true`, upload the box artifact through
   Vagrant Cloud instead of directly to the backend storage.
 

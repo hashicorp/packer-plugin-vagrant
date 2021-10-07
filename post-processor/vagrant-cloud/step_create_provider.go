@@ -2,17 +2,21 @@ package vagrantcloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type Provider struct {
-	Name        string `json:"name"`
-	Url         string `json:"url,omitempty"`
-	HostedToken string `json:"hosted_token,omitempty"`
-	UploadUrl   string `json:"upload_url,omitempty"`
+	Name         string `json:"name"`
+	Url          string `json:"url,omitempty"`
+	HostedToken  string `json:"hosted_token,omitempty"`
+	UploadUrl    string `json:"upload_url,omitempty"`
+	Checksum     string `json:"checksum,omitempty"`
+	ChecksumType string `json:"checksum_type,omitempty"`
 }
 
 type stepCreateProvider struct {
@@ -26,6 +30,7 @@ func (s *stepCreateProvider) Run(ctx context.Context, state multistep.StateBag) 
 	version := state.Get("version").(*Version)
 	providerName := state.Get("providerName").(string)
 	downloadUrl := state.Get("boxDownloadUrl").(string)
+	checksum := state.Get("boxChecksum").(string)
 
 	path := fmt.Sprintf("box/%s/version/%v/providers", box.Tag, version.Version)
 
@@ -33,6 +38,16 @@ func (s *stepCreateProvider) Run(ctx context.Context, state multistep.StateBag) 
 
 	if downloadUrl != "" {
 		provider.Url = downloadUrl
+	}
+
+	if checksum != "" {
+		checksumParts := strings.SplitN(checksum, ":", 2)
+		if len(checksumParts) != 2 {
+			state.Put("error", errors.New("Error parsing box_checksum: invalid format"))
+			return multistep.ActionHalt
+		}
+		provider.ChecksumType = checksumParts[0]
+		provider.Checksum = checksumParts[1]
 	}
 
 	// Wrap the provider in a provider object for the API
