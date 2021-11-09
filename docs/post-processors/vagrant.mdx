@@ -162,16 +162,18 @@ build {
   sources = [
     "source.null.example"
   ]
-
-  post-processor "artifice" {
-    files = ["output-virtualbox-iso/vbox-example-disk001.vmdk",
-             "output-virtualbox-iso/vbox-example.ovf"]
-  }
-
-  post-processor "vagrant" {
-    keep_input_artifact = true
-    provider_override = "virtualbox"
-  }
+  post-processors {  
+    post-processor "artifice" {
+      files = [
+        "output-virtualbox-iso/vbox-example-disk001.vmdk",
+        "output-virtualbox-iso/vbox-example.ovf"
+      ]
+    }
+    post-processor "vagrant" {
+      keep_input_artifact = true
+      provider_override   = "virtualbox"
+    }  
+  }  
 }
 ```
 
