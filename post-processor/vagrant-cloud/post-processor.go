@@ -11,6 +11,7 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -48,6 +49,7 @@ type Config struct {
 	InsecureSkipTLSVerify bool   `mapstructure:"insecure_skip_tls_verify"`
 	BoxDownloadUrl        string `mapstructure:"box_download_url"`
 	NoDirectUpload        bool   `mapstructure:"no_direct_upload"`
+	BoxChecksum           string `mapstructure:"box_checksum"`
 
 	ctx interpolate.Context
 }
@@ -171,6 +173,12 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		return nil, false, false, fmt.Errorf("Error processing box_download_url: %s", err)
 	}
 
+	if p.config.BoxChecksum != "" {
+		if checksumParts := strings.SplitN(p.config.BoxChecksum, ":", 2); len(checksumParts) != 2 {
+			return nil, false, false, errors.New(" box checksum must be specified as `$type:$digest`")
+		}
+	}
+
 	// Set up the state
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &p.config)
@@ -180,6 +188,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	state.Put("ui", ui)
 	state.Put("providerName", providerName)
 	state.Put("boxDownloadUrl", boxDownloadUrl)
+	state.Put("boxChecksum", p.config.BoxChecksum)
 
 	// Build the steps
 	steps := []multistep.Step{

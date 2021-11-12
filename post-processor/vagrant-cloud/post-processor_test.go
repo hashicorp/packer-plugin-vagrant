@@ -35,6 +35,17 @@ func testGoodConfig() map[string]interface{} {
 		"version_description": "bar",
 		"box_tag":             "hashicorp/precise64",
 		"version":             "0.5",
+		"box_checksum":        "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", // /dev/null
+	}
+}
+
+func testBadChecksumSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"access_token":        "foo",
+		"version_description": "bar",
+		"box_tag":             "hashicorp/precise64",
+		"version":             "0.5",
+		"box_checksum":        "test",
 	}
 }
 
@@ -226,6 +237,55 @@ func TestPostProcessor_Configure_checkAccessTokenIsNotRequiredForOverridenVagran
 	config["vagrant_cloud_url"] = server.URL
 	if err := p.Configure(config); err != nil {
 		t.Fatalf("Expected blank access token to be allowed and authenticate to pass: %s", err)
+	}
+}
+
+func TestPostProcessor_PostProcess_badChecksumSpec(t *testing.T) {
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider": "virtualbox"}`},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	artifact := &packersdk.MockArtifact{
+		BuilderIdValue: "mitchellh.post-processor.vagrant",
+		FilesValue:     []string{boxfile.Name()},
+	}
+
+	s := newStackServer([]stubResponse{stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-path"}})
+	defer s.Close()
+
+	stack := []stubResponse{
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/authenticate"},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
+	}
+
+	server := newStackServer(stack)
+	defer server.Close()
+	config := testBadChecksumSpec()
+	config["vagrant_cloud_url"] = server.URL
+
+	var p PostProcessor
+
+	err = p.Configure(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	_, _, _, err = p.PostProcess(context.Background(), testUi(), artifact)
+	if err == nil {
+		t.Fatal("Expected bad checksum spec error")
+	}
+	if !strings.Contains(err.Error(), "box checksum must be specified as") {
+		t.Fatalf("Unexpected error: %v", err)
 	}
 }
 
