@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/hashicorp/go-version v1.3.0
 	github.com/hashicorp/hcl/v2 v2.11.1
-	github.com/hashicorp/packer-plugin-sdk v0.2.9
+	github.com/hashicorp/packer-plugin-sdk v0.2.11
 	github.com/klauspost/compress v1.11.13 // indirect
 	github.com/klauspost/crc32 v1.2.0 // indirect
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
