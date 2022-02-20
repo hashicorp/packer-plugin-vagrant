@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
@@ -66,26 +67,28 @@ func (p *LibVirtProvider) KeepInputArtifact() bool {
 	return false
 }
 func (p *LibVirtProvider) Process(ui packersdk.Ui, artifact packersdk.Artifact, dir string) (vagrantfile string, metadata map[string]interface{}, err error) {
+	disks := []map[string]string{}
+	format := artifact.State("diskType").(string)
 	diskName := artifact.State("diskName").(string)
-
-	// Copy the disk image into the temporary directory (as box.img)
+	disk_index := 0
 	for _, path := range artifact.Files() {
-		if filepath.Base(path) == diskName {
-			ui.Message(fmt.Sprintf("Copying from artifact: %s", path))
-			dstPath := filepath.Join(dir, "box.img")
-			if err = CopyContents(dstPath, path); err != nil {
-				return
-			}
+		// DiskName is [vmName, vmName-1, vmName-2]
+		if !strings.HasPrefix(filepath.Base(path), diskName) {
+			continue
+		}
+		ui.Message(fmt.Sprintf("Copying from artifact: %s", path))
+		dstDiskName := fmt.Sprintf("box_%d.img", disk_index)
+		dstPath := filepath.Join(dir, dstDiskName)
+		disks = append(disks, map[string]string{
+			"path":   dstDiskName,
+			"format": format,
+		})
+		disk_index++
+		if err = CopyContents(dstPath, path); err != nil {
+			return
 		}
 	}
 
-	format := artifact.State("diskType").(string)
-	origSize := sizeInMegabytes(artifact.State("diskSize").(string))
-	size := origSize / 1024 // In MB, want GB
-	if origSize%1024 > 0 {
-		// Make sure we don't make the size smaller
-		size++
-	}
 	domainType := artifact.State("domainType").(string)
 
 	// Convert domain type to libvirt driver
@@ -101,9 +104,8 @@ func (p *LibVirtProvider) Process(ui packersdk.Ui, artifact packersdk.Artifact, 
 
 	// Create the metadata
 	metadata = map[string]interface{}{
-		"provider":     "libvirt",
-		"format":       format,
-		"virtual_size": size,
+		"provider": "libvirt",
+		"disks":    disks,
 	}
 
 	vagrantfile = fmt.Sprintf(libvirtVagrantfile, driver)
