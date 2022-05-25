@@ -10,5 +10,5 @@ jobs:
     steps:
       - uses: actions/add-to-project@main
         with:
-          project-url: https://github.com/orgs/hashicorp/projects/158
+          project-url: https://github.com/orgs/hashicorp/projects/105
           github-token: ${{ secrets.PACKER_PROJ_BOARD_TOKEN }}
