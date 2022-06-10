@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/hashicorp/go-version v1.3.0
 	github.com/hashicorp/hcl/v2 v2.12.0
-	github.com/hashicorp/packer-plugin-sdk v0.2.13
+	github.com/hashicorp/packer-plugin-sdk v0.3.0
 	github.com/klauspost/compress v1.11.13 // indirect
 	github.com/klauspost/crc32 v1.2.0 // indirect
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
@@ -39,9 +39,9 @@ require (
 	github.com/hashicorp/consul/api v1.10.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-getter/gcs/v2 v2.0.0-20200604122502-a6995fa1edad // indirect
-	github.com/hashicorp/go-getter/s3/v2 v2.0.0-20200604122502-a6995fa1edad // indirect
-	github.com/hashicorp/go-getter/v2 v2.0.2 // indirect
+	github.com/hashicorp/go-getter/gcs/v2 v2.1.0 // indirect
+	github.com/hashicorp/go-getter/s3/v2 v2.1.0 // indirect
+	github.com/hashicorp/go-getter/v2 v2.1.0 // indirect
 	github.com/hashicorp/go-hclog v0.16.2 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
