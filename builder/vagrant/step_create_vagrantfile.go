@@ -6,9 +6,11 @@ package vagrant
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
@@ -16,16 +18,25 @@ import (
 )
 
 type StepCreateVagrantfile struct {
-	Template     string
-	OutputDir    string
-	SyncedFolder string
-	GlobalID     string
-	SourceBox    string
-	BoxName      string
-	InsertKey    bool
+	Template               string
+	OutputDir              string
+	SyncedFolder           string
+	GlobalID               string
+	SourceBox              string
+	BoxName                string
+	InsertKey              bool
+	defaultTemplateContent string
 }
 
-var DEFAULT_TEMPLATE = `Vagrant.configure("2") do |config|
+type VagrantfileOptions struct {
+	SyncedFolder    string
+	SourceBox       string
+	BoxName         string
+	InsertKey       bool
+	DefaultTemplate string
+}
+
+const DEFAULT_TEMPLATE = `Vagrant.configure("2") do |config|
   config.vm.define "source", autostart: false do |source|
 	source.vm.box = "{{.SourceBox}}"
 	config.ssh.insert_key = {{.InsertKey}}
@@ -42,51 +53,55 @@ var DEFAULT_TEMPLATE = `Vagrant.configure("2") do |config|
   {{- end}}
 end`
 
-type VagrantfileOptions struct {
-	SyncedFolder string
-	SourceBox    string
-	BoxName      string
-	InsertKey    bool
-}
+var defaultTemplate = template.Must(template.New("VagrantTpl").Parse(DEFAULT_TEMPLATE))
 
-func (s *StepCreateVagrantfile) createVagrantfile() (string, error) {
-	tplPath := filepath.Join(s.OutputDir, "Vagrantfile")
+func (s *StepCreateVagrantfile) createVagrantfile() (tplPath string, err error) {
+	tplPath, err = filepath.Abs(filepath.Join(s.OutputDir, "Vagrantfile"))
+	if err != nil {
+		return
+	}
+
 	templateFile, err := os.Create(tplPath)
 	if err != nil {
-		retErr := fmt.Errorf("Error creating vagrantfile %s", err.Error())
-		return "", retErr
+		err = fmt.Errorf("Error creating vagrantfile %s", err.Error())
+		return
 	}
 
-	var tpl *template.Template
+	if s.defaultTemplateContent, err = s.renderDefaultTemplate(); err != nil {
+		return
+	}
+
 	if s.Template == "" {
-		// Generate vagrantfile template based on our default
-		tpl = template.Must(template.New("VagrantTpl").Parse(DEFAULT_TEMPLATE))
+		// Generate vagrantfile template based on our default template
+		_, err = templateFile.WriteString(s.defaultTemplateContent)
 	} else {
-		// Read in the template from provided file.
+		// Otherwise, read in the template from provided file.
+		var tpl *template.Template
 		tpl, err = template.ParseFiles(s.Template)
-		if err != nil {
-			return "", err
+		if err == nil {
+			err = s.executeTemplate(tpl, templateFile)
 		}
 	}
+	return
+}
 
+func (s *StepCreateVagrantfile) executeTemplate(tpl *template.Template, file io.Writer) error {
 	opts := &VagrantfileOptions{
-		SyncedFolder: s.SyncedFolder,
-		BoxName:      s.BoxName,
-		SourceBox:    s.SourceBox,
-		InsertKey:    s.InsertKey,
+		SyncedFolder:    s.SyncedFolder,
+		BoxName:         s.BoxName,
+		SourceBox:       s.SourceBox,
+		InsertKey:       s.InsertKey,
+		DefaultTemplate: s.defaultTemplateContent,
 	}
+	return tpl.Execute(file, opts)
+}
 
-	err = tpl.Execute(templateFile, opts)
-	if err != nil {
-		return "", err
+func (s *StepCreateVagrantfile) renderDefaultTemplate() (string, error) {
+	buf := new(strings.Builder)
+	if err := s.executeTemplate(defaultTemplate, buf); err != nil {
+		return "", fmt.Errorf("Error rendering default template %w", err)
 	}
-
-	abspath, err := filepath.Abs(tplPath)
-	if err != nil {
-		return "", err
-	}
-
-	return abspath, nil
+	return buf.String(), nil
 }
 
 func (s *StepCreateVagrantfile) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
