@@ -44,7 +44,7 @@ func (s *stepReleaseVersion) Run(ctx context.Context, state multistep.StateBag) 
 		return multistep.ActionHalt
 	}
 
-	ui.Message(fmt.Sprintf("Version successfully released and available"))
+	ui.Message("Version successfully released and available")
 
 	return multistep.ActionContinue
 }
