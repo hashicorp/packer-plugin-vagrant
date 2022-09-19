@@ -32,7 +32,7 @@ func (s *stepUpload) Run(ctx context.Context, state multistep.StateBag) multiste
 		Tries:      3,
 		RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 10 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
-		ui.Message(fmt.Sprintf("Uploading box"))
+		ui.Message("Uploading box")
 
 		var err error
 		var resp *http.Response

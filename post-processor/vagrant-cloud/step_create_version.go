@@ -25,7 +25,7 @@ func (s *stepCreateVersion) Run(ctx context.Context, state multistep.StateBag) m
 	ui.Say(fmt.Sprintf("Creating version: %s", config.Version))
 
 	if hasVersion, v := box.HasVersion(config.Version); hasVersion {
-		ui.Message(fmt.Sprintf("Version exists, skipping creation"))
+		ui.Message("Version exists, skipping creation")
 		state.Put("version", v)
 		return multistep.ActionContinue
 	}
