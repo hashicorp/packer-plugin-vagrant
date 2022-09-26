@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/hashicorp/go-version v1.3.0
-	github.com/hashicorp/hcl/v2 v2.13.0
+	github.com/hashicorp/hcl/v2 v2.14.1
 	github.com/hashicorp/packer-plugin-sdk v0.3.1
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
 	github.com/mitchellh/mapstructure v1.4.1
