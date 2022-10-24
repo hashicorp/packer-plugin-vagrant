@@ -251,6 +251,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	if b.config.SyncedFolder != "" {
+		if strings.HasPrefix(b.config.SyncedFolder, "~/") {
+			homedir, _ := os.UserHomeDir()
+			b.config.SyncedFolder = filepath.Join(homedir, b.config.SyncedFolder[2:])
+		}
 		b.config.SyncedFolder, err = filepath.Abs(b.config.SyncedFolder)
 		if err != nil {
 			errs = packersdk.MultiErrorAppend(errs,
