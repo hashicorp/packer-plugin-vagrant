@@ -68,7 +68,7 @@ func (p *LibVirtProvider) Process(ui packersdk.Ui, artifact packersdk.Artifact, 
 
 	// Copy the disk image into the temporary directory (as box.img)
 	for _, path := range artifact.Files() {
-		if strings.HasSuffix(path, "/"+diskName) {
+		if strings.HasSuffix(path, diskName) {
 			ui.Message(fmt.Sprintf("Copying from artifact: %s", path))
 			dstPath := filepath.Join(dir, "box.img")
 			if err = CopyContents(dstPath, path); err != nil {
