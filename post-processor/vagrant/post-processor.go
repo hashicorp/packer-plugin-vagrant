@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 //go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
 // vagrant implements the packersdk.PostProcessor interface and adds a

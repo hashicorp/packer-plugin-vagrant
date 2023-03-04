@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package vagrant
 
 // Create a mock driver so that we can test Vagrant builder steps
