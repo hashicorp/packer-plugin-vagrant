@@ -3,3 +3,4 @@ dist/*
 packer-plugin-vagrant
 packer-plugin-vagrant.exe
 .docs
+crash.log
