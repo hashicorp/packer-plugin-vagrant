@@ -1,13 +1,3 @@
----
-description: |
-  The Vagrant Cloud post-processor enables the upload of Vagrant boxes to
-  Vagrant Cloud.
-page_title: Vagrant Cloud - Post-Processors
-nav_title: Vagrant Cloud
----
-
-# Vagrant Cloud Post-Processor
-
 Type: `vagrant-cloud`
 Artifact BuilderId: `pearkes.post-processor.vagrant-cloud`
 
@@ -17,9 +7,9 @@ simple way.
 
 The Vagrant Cloud post-processor enables the upload of Vagrant boxes to Vagrant
 Cloud. Currently, the Vagrant Cloud post-processor will accept and upload boxes
-supplied to it from the [Vagrant](/docs/post-processors/vagrant.mdx) or
-[Artifice](https://developer.hashicorp.com/packer/docs/post-processors/artifice) post-processors and the
-[Vagrant](/docs/builders/vagrant.mdx) builder.
+supplied to it from the [Vagrant](/docs/post-processor/vagrant.mdx) or
+[Artifice](https://developer.hashicorp.com/packer/docs/post-processor/artifice) post-processors and the
+[Vagrant](/docs/builder/vagrant.mdx) builder.
 
 You'll need to be familiar with Vagrant Cloud, have an upgraded account to
 enable box hosting, and be distributing your box via the [shorthand name](https://developer.hashicorp.com/vagrant/docs/cli/box) configuration.
