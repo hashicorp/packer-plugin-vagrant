@@ -1,19 +1,3 @@
----
-description: >
-  The Packer Vagrant post-processor takes a build and converts the artifact into
-
-  a valid Vagrant box, if it can. This lets you use Packer to automatically
-
-  create arbitrarily complex Vagrant boxes, and is in fact how the official
-  boxes
-
-  distributed by Vagrant are created.
-page_title: Vagrant - Post-Processors
-nav_title: Vagrant
----
-
-# Vagrant Post-Processor
-
 Type: `vagrant`
 Artifact BuilderId: `mitchellh.post-processor.vagrant`
 
