@@ -45,7 +45,7 @@ type Config struct {
 	// collisions. If unset, it will be set to packer- plus your buildname.
 	OutputDir string `mapstructure:"output_dir" required:"false"`
 	// URL of the vagrant box to use, or the name of the vagrant box.
-	// hashicorp/precise64, ./mylocalbox.box and https://example.com/my-box.box
+	// hashicorp/precise64, ./mylocalbox.box and <https://example.com/my-box.box>
 	// are all valid source boxes. If your source is a .box file, whether
 	// locally or from a URL like the latter example above, you will also need
 	// to provide a box_name. This option is required, unless you set
@@ -142,7 +142,7 @@ type Config struct {
 	SkipPackage       bool   `mapstructure:"skip_package" required:"false"`
 	OutputVagrantfile string `mapstructure:"output_vagrantfile"`
 	// Equivalent to setting the
-	// [`--include`](https://www.vagrantup.com/docs/cli/package.html#include-x-y-z) option
+	// [`--include`](https://developer.hashicorp.com/vagrant/docs/cli/package#include-x-y-z) option
 	// in `vagrant package`; defaults to unset
 	PackageInclude []string `mapstructure:"package_include"`
 
