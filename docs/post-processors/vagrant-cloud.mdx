@@ -17,13 +17,12 @@ simple way.
 
 The Vagrant Cloud post-processor enables the upload of Vagrant boxes to Vagrant
 Cloud. Currently, the Vagrant Cloud post-processor will accept and upload boxes
-supplied to it from the [Vagrant](/packer/plugins/post-processors/vagrant/vagrant) or
-[Artifice](/packer/docs/post-processors/artifice) post-processors and the
-[Vagrant](/packer/plugins/builders/vagrant/vagrant) builder.
+supplied to it from the [Vagrant](/docs/post-processors/vagrant.mdx) or
+[Artifice](https://developer.hashicorp.com/packer/docs/post-processors/artifice) post-processors and the
+[Vagrant](/docs/builders/vagrant.mdx) builder.
 
 You'll need to be familiar with Vagrant Cloud, have an upgraded account to
-enable box hosting, and be distributing your box via the [shorthand
-name](https://docs.vagrantup.com/v2/cli/box.html) configuration.
+enable box hosting, and be distributing your box via the [shorthand name](https://docs.vagrantup.com/v2/cli/box.html) configuration.
 
 ## Workflow
 
@@ -36,21 +35,21 @@ and deliver them to your team in some fashion.
 
 Here is an example workflow:
 
-1.  You use Packer to build a Vagrant Box for the `virtualbox` provider
-2.  The `vagrant-cloud` post-processor is configured to point to the box
+1. You use Packer to build a Vagrant Box for the `virtualbox` provider
+2. The `vagrant-cloud` post-processor is configured to point to the box
     `hashicorp/foobar` on Vagrant Cloud via the `box_tag` configuration
-3.  The post-processor receives the box from the `vagrant` post-processor
-4.  It then creates the configured version, or verifies the existence of it, on
+3. The post-processor receives the box from the `vagrant` post-processor
+4. It then creates the configured version, or verifies the existence of it, on
     Vagrant Cloud
-5.  A provider matching the name of the Vagrant provider is then created
-6.  The box is uploaded to Vagrant Cloud
-7.  The upload is verified
-8.  The version is released and available to users of the box
+5. A provider matching the name of the Vagrant provider is then created
+6. The box is uploaded to Vagrant Cloud
+7. The upload is verified
+8. The version is released and available to users of the box
 
 ~> The Vagrant Cloud box (`hashicorp/foobar` in this example) must already
 exist. Packer will not create the box automatically. If running Packer in
 automation, consider using the
-[Vagrant Cloud API](https://www.vagrantup.com/docs/vagrant-cloud/api.html)
+[Vagrant Cloud API](https://www.vagrantup.com/docs/vagrant-cloud/api)
 to create the Vagrant Cloud box if it doesn't already exist.
 
 ## Configuration
@@ -58,7 +57,7 @@ to create the Vagrant Cloud box if it doesn't already exist.
 The configuration allows you to specify the target box that you have access to
 on Vagrant Cloud, as well as authentication and version information.
 
-### Required:
+### Required
 
 - `box_tag` (string) - The shorthand tag for your box that maps to Vagrant
   Cloud, for example `hashicorp/precise64`, which is short for
@@ -87,7 +86,7 @@ on Vagrant Cloud, as well as authentication and version information.
   other than the default then `access_token` can be left blank and no
   `Authorization` header will be added to requests sent by this post-processor.
 
-### Optional:
+### Optional
 
 - `no_release` (string) - If set to true, does not release the version on
   Vagrant Cloud, making it active. You can manually release the version via
@@ -106,10 +105,10 @@ on Vagrant Cloud, as well as authentication and version information.
   full-length and in-depth description of the version, typically for denoting
   changes introduced
 
-- `box_download_url` (string) - Optional URL for a self-hosted box. If this
-  is set the box will not be uploaded to the Vagrant Cloud.
-  This is a [template engine](/packer/docs/templates/legacy_json_templates/engine). Therefore, you
-  may use user variables and template functions in this field.
+- `box_download_url` (string) - Optional URL for a self-hosted box.
+  If this is set the box will not be uploaded to the Vagrant Cloud.
+  This is a [template engine](https://developer.hashicorp.com/packer/docs/templates/legacy_json_templates/engine).
+  Therefore, you may use user variables and template functions in this field.
   The following extra variables are also available in this engine:
 
   - `Provider`: The Vagrant provider the box is for
@@ -123,15 +122,15 @@ on Vagrant Cloud, as well as authentication and version information.
   - "sha1:{$checksum}"
   - "sha256:{$checksum}"
   - "sha512:{$checksum}"
-  See https://www.vagrantup.com/vagrant-cloud/api#arguments-7
+  See <https://www.vagrantup.com/vagrant-cloud/api#arguments-7>
 
 - `no_direct_upload` (boolean) - When `true`, upload the box artifact through
   Vagrant Cloud instead of directly to the backend storage.
 
 ## Use with the Vagrant Post-Processor
 
-An example configuration is shown below. Note the use of the [post-processors](https://www.packer.io/docs/templates/hcl_templates/blocks/build/post-processors)
-block that wraps both the Vagrant and Vagrant Cloud [post-processor](https://www.packer.io/docs/templates/hcl_templates/blocks/build/post-processor) blocks within the post-processor section. Chaining
+An example configuration is shown below. Note the use of the [post-processors](https://developer.hashicorp.com/packer/docs/templates/hcl_templates/blocks/build/post-processors)
+block that wraps both the Vagrant and Vagrant Cloud [post-processor](https://developer.hashicorp.com/packer/docs/templates/hcl_templates/blocks/build/post-processors) blocks within the post-processor section. Chaining
 the post-processors together in this way tells Packer that the artifact
 produced by the Vagrant post-processor should be passed directly to the Vagrant
 Cloud Post-Processor. It also sets the order in which the post-processors
@@ -289,5 +288,3 @@ build {
 
 </Tab>
 </Tabs>
-
-
