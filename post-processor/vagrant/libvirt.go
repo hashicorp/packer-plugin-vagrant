@@ -20,13 +20,13 @@ func lower(c byte) byte {
 //
 // Valid units (case-insensitive):
 //
-//		B (byte)        1B
-//		K (kilobyte) 1024B
-//		M (megabyte) 1024K
-//		G (gigabyte) 1024M
-//		T (terabyte) 1024G
-//		P (petabyte) 1024T
-//		E (exabyte)  1024P
+//	B (byte)        1B
+//	K (kilobyte) 1024B
+//	M (megabyte) 1024K
+//	G (gigabyte) 1024M
+//	T (terabyte) 1024G
+//	P (petabyte) 1024T
+//	E (exabyte)  1024P
 //
 // The default is M.
 func sizeInMegabytes(size string) uint64 {
