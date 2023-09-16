@@ -43,7 +43,7 @@ func (s *stepCreateVersion) Run(ctx context.Context, state multistep.StateBag) m
 
 	resp, err := client.Post(path, wrapper)
 
-	if err != nil || (resp.StatusCode != 200) {
+	if err != nil || (resp.StatusCode != 200 && resp.StatusCode != 201) {
 		cloudErrors := &VagrantCloudErrors{}
 		err = decodeBody(resp, cloudErrors)
 		if err != nil {
