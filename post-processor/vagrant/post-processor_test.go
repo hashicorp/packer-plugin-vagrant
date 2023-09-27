@@ -9,6 +9,7 @@ import (
 	"context"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -65,6 +66,40 @@ func TestPostProcessorPrepare_compressionLevel(t *testing.T) {
 	if config.CompressionLevel != 7 {
 		t.Fatalf("bad: %#v", config.CompressionLevel)
 	}
+}
+
+func TestPostProcessorPrepare_architecture(t *testing.T) {
+	var p PostProcessor
+
+	matchingArch := runtime.GOARCH
+	if mappedArch, ok := vagrantArchMap[matchingArch]; ok {
+		matchingArch = mappedArch
+	}
+
+	// Default
+	c := testConfig()
+	delete(c, "architecture")
+	if err := p.Configure(c); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	config := p.config
+	if config.Architecture != matchingArch {
+		t.Fatalf("bad: %#v", config.Architecture)
+	}
+
+	// Set
+	c = testConfig()
+	c["architecture"] = "s390x"
+	if err := p.Configure(c); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	config = p.config
+	if config.Architecture != "s390x" {
+		t.Fatalf("bad: %#v", config.Architecture)
+	}
+
 }
 
 func TestPostProcessorPrepare_outputPath(t *testing.T) {

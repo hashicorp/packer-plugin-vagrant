@@ -43,7 +43,7 @@ func (s *stepPrepareUpload) Run(ctx context.Context, state multistep.StateBag) m
 		}
 	}
 
-	path := fmt.Sprintf("box/%s/version/%v/provider/%s/upload", box.Tag, version.Version, provider.Name)
+	path := fmt.Sprintf("box/%s/version/%v/provider/%s/%s/upload", box.Tag, version.Version, provider.Name, provider.Architecture)
 	if !config.NoDirectUpload {
 		path = path + "/direct"
 	}

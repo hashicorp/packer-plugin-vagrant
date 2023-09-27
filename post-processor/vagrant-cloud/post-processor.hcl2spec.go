@@ -22,6 +22,8 @@ type FlatConfig struct {
 	Version               *string           `mapstructure:"version" cty:"version" hcl:"version"`
 	VersionDescription    *string           `mapstructure:"version_description" cty:"version_description" hcl:"version_description"`
 	NoRelease             *bool             `mapstructure:"no_release" cty:"no_release" hcl:"no_release"`
+	Architecture          *string           `mapstructure:"architecture" cty:"architecture" hcl:"architecture"`
+	DefaultArchitecture   *string           `mapstructure:"default_architecture" cty:"default_architecture" hcl:"default_architecture"`
 	AccessToken           *string           `mapstructure:"access_token" cty:"access_token" hcl:"access_token"`
 	VagrantCloudUrl       *string           `mapstructure:"vagrant_cloud_url" cty:"vagrant_cloud_url" hcl:"vagrant_cloud_url"`
 	InsecureSkipTLSVerify *bool             `mapstructure:"insecure_skip_tls_verify" cty:"insecure_skip_tls_verify" hcl:"insecure_skip_tls_verify"`
@@ -54,6 +56,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"version":                    &hcldec.AttrSpec{Name: "version", Type: cty.String, Required: false},
 		"version_description":        &hcldec.AttrSpec{Name: "version_description", Type: cty.String, Required: false},
 		"no_release":                 &hcldec.AttrSpec{Name: "no_release", Type: cty.Bool, Required: false},
+		"architecture":               &hcldec.AttrSpec{Name: "architecture", Type: cty.String, Required: false},
+		"default_architecture":       &hcldec.AttrSpec{Name: "default_architecture", Type: cty.String, Required: false},
 		"access_token":               &hcldec.AttrSpec{Name: "access_token", Type: cty.String, Required: false},
 		"vagrant_cloud_url":          &hcldec.AttrSpec{Name: "vagrant_cloud_url", Type: cty.String, Required: false},
 		"insecure_skip_tls_verify":   &hcldec.AttrSpec{Name: "insecure_skip_tls_verify", Type: cty.Bool, Required: false},

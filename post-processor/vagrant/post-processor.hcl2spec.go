@@ -25,6 +25,7 @@ type FlatConfig struct {
 	VagrantfileTemplate          *string                `mapstructure:"vagrantfile_template" cty:"vagrantfile_template" hcl:"vagrantfile_template"`
 	VagrantfileTemplateGenerated *bool                  `mapstructure:"vagrantfile_template_generated" cty:"vagrantfile_template_generated" hcl:"vagrantfile_template_generated"`
 	ProviderOverride             *string                `mapstructure:"provider_override" cty:"provider_override" hcl:"provider_override"`
+	Architecture                 *string                `mapstructure:"architecture" cty:"architecture" hcl:"architecture"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -54,6 +55,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vagrantfile_template":           &hcldec.AttrSpec{Name: "vagrantfile_template", Type: cty.String, Required: false},
 		"vagrantfile_template_generated": &hcldec.AttrSpec{Name: "vagrantfile_template_generated", Type: cty.Bool, Required: false},
 		"provider_override":              &hcldec.AttrSpec{Name: "provider_override", Type: cty.String, Required: false},
+		"architecture":                   &hcldec.AttrSpec{Name: "architecture", Type: cty.String, Required: false},
 	}
 	return s
 }

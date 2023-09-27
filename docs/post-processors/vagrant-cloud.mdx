@@ -82,13 +82,20 @@ on Vagrant Cloud, as well as authentication and version information.
 
 - `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud.
   This is useful if you're using Vagrant Private Cloud in your own network.
-  Defaults to `https://vagrantcloud.com/api/v1`. If this value is set to something
+  Defaults to `https://vagrantcloud.com/api/v2`. If this value is set to something
   other than the default then `access_token` can be left blank and no
   `Authorization` header will be added to requests sent by this post-processor.
 
 ### Optional
+- `architecture` (string) - The architecture of the Vagrant box. This will be
+  detected from the box if possible by default. Supported values: amd64, i386,
+  arm, arm64, ppc64le, ppc64, mips64le, mips64, mipsle, mips, and s390x.
 
-- `no_release` (string) - If set to true, does not release the version on
+- `default_architecture` (string) - The architecture that should be flagged as
+  the default architecture for this provider. See the [Vagrant Cloud documentation](https://developer.hashicorp.com/vagrant/vagrant-cloud/boxes/architecture)
+  for more information.
+
+- `no_release` (boolean) - If set to true, does not release the version on
   Vagrant Cloud, making it active. You can manually release the version via
   the API or Web UI. Defaults to `false`.
 
@@ -111,6 +118,7 @@ on Vagrant Cloud, as well as authentication and version information.
   Therefore, you may use user variables and template functions in this field.
   The following extra variables are also available in this engine:
 
+  - `Architecture`: The architecture of the Vagrant box
   - `Provider`: The Vagrant provider the box is for
   - `ArtifactId`: The ID of the input artifact.
 
@@ -147,6 +155,7 @@ likely cause the Vagrant Cloud post-processor to error and fail.
   "variables": {
     "cloud_token": "{{ env `VAGRANT_CLOUD_TOKEN` }}",
     "version": "1.0.{{timestamp}}"
+    "architecture": "amd64",
   },
   "post-processors": [
     {
@@ -164,7 +173,8 @@ likely cause the Vagrant Cloud post-processor to error and fail.
         "type": "vagrant-cloud",
         "box_tag": "hashicorp/precise64",
         "access_token": "{{user `cloud_token`}}",
-        "version": "{{user `version`}}"
+        "version": "{{user `version`}}",
+        "architecture": "{{user `architecture`}}"
       }
     ]
   ]
@@ -190,6 +200,7 @@ build {
       access_token = "${var.cloud_token}"
       box_tag      = "hashicorp/precise64"
       version      = "${local.version}"
+      architecture = "${local.architecture}"
     }
   }
 }
@@ -242,7 +253,8 @@ Additional files bundled by the Artifice post-processor will be ignored.
         "type": "vagrant-cloud",
         "box_tag": "myorganisation/mybox",
         "access_token": "{{user `cloud_token`}}",
-        "version": "0.1.0"
+        "version": "0.1.0",
+        "architecture": "amd64"
       }
     ]
   ]
@@ -275,6 +287,7 @@ build {
       access_token = "${var.cloud_token}"
       box_tag      = "myorganisation/mybox"
       version      = "0.1.0"
+      architecture = "amd64"
     }
   }
 }
