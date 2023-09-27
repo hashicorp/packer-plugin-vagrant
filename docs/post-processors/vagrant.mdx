@@ -38,6 +38,7 @@ providers.
 - Azure
 - DigitalOcean
 - Docker
+- File
 - Hyper-V
 - LXC
 - Parallels
@@ -64,6 +65,11 @@ However, if you want to configure things a bit more, the post-processor does
 expose some configuration options. The available options are listed below, with
 more details about certain options in following sections.
 
+- `architecture` (string) - The architecture of the Vagrant box. This will be
+  set to the detected architecture of the builder host by default. Supported
+  values: amd64, i386, arm, arm64, ppc64le, ppc64, mips64le, mips64, mipsle,
+  mips, and s390x.
+
 - `compression_level` (number) - An integer representing the compression
   level to use when creating the Vagrant box. Valid values range from 0 to 9,
   with 0 being no compression and 9 being the best compression. By default,
@@ -87,12 +93,13 @@ more details about certain options in following sections.
   variables and template functions in this field. The following extra
   variables are also available in this engine:
 
+  - `Architecture`: The architecture of the Vagrant box
   - `Provider`: The Vagrant provider the box is for
   - `ArtifactId`: The ID of the input artifact.
   - `BuildName`: The name of the build.
 
   By default, the value of this config is
-  `packer_{{.BuildName}}_{{.Provider}}.box`.
+  `packer_{{.BuildName}}_{{.Provider}}_{{.Architecture}}.box`.
 
 - `provider_override` (string) - this option will override the internal logic
   that decides which Vagrant provider to set for a particular Packer builder's
@@ -215,6 +222,7 @@ The available provider names are:
 - `aws`
 - `azure`
 - `digitalocean`
+- `file`
 - `google`
 - `hyperv`
 - `parallels`

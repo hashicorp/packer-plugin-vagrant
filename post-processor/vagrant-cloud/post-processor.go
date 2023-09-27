@@ -37,15 +37,17 @@ var builtins = map[string]string{
 	"vagrant":                          "vagrant",
 }
 
-const VAGRANT_CLOUD_URL = "https://vagrantcloud.com/api/v1"
+const VAGRANT_CLOUD_URL = "https://vagrantcloud.com/api/v2"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Tag                string `mapstructure:"box_tag"`
-	Version            string `mapstructure:"version"`
-	VersionDescription string `mapstructure:"version_description"`
-	NoRelease          bool   `mapstructure:"no_release"`
+	Tag                 string `mapstructure:"box_tag"`
+	Version             string `mapstructure:"version"`
+	VersionDescription  string `mapstructure:"version_description"`
+	NoRelease           bool   `mapstructure:"no_release"`
+	Architecture        string `mapstructure:"architecture"`
+	DefaultArchitecture string `mapstructure:"default_architecture"`
 
 	AccessToken           string `mapstructure:"access_token"`
 	VagrantCloudUrl       string `mapstructure:"vagrant_cloud_url"`
@@ -150,8 +152,22 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		ui.Message("Warning: Using Vagrant Cloud token found in ATLAS_TOKEN. Please make sure it is correct, or set VAGRANT_CLOUD_TOKEN")
 	}
 
+	var boxMetadata map[string]interface{}
+	var err error
+
+	// Get the architecture
+	archName := p.config.Architecture
+	if archName == "" {
+		if boxMetadata, err = metadataFromVagrantBox(artifact.Files()[0]); err != nil {
+			return nil, false, false, err
+		}
+		if archName, err = getArchitecture(boxMetadata); err != nil {
+			return nil, false, false, err
+		}
+	}
+
 	// Determine the name of the provider for Vagrant Cloud, and Vagrant
-	providerName, err := getProvider(artifact.Id(), artifact.Files()[0], builtins[artifact.BuilderId()])
+	providerName, err := getProvider(artifact.Id(), artifact.Files()[0], builtins[artifact.BuilderId()], boxMetadata)
 	if err != nil {
 		return nil, false, false, fmt.Errorf("error getting provider name: %s", err)
 	}
@@ -169,6 +185,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	}
 	generatedData["ArtifactId"] = artifact.Id()
 	generatedData["Provider"] = providerName
+	generatedData["Architecture"] = archName
 	p.config.ctx.Data = generatedData
 
 	boxDownloadUrl, err := interpolate.Render(p.config.BoxDownloadUrl, &p.config.ctx)
@@ -192,6 +209,8 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	state.Put("providerName", providerName)
 	state.Put("boxDownloadUrl", boxDownloadUrl)
 	state.Put("boxChecksum", p.config.BoxChecksum)
+	state.Put("architecture", archName)
+	state.Put("defaultArchitecture", archName == p.config.DefaultArchitecture)
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -219,18 +238,26 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	return NewArtifact(providerName, p.config.Tag), true, false, nil
 }
 
-func getProvider(builderName, boxfile, builderId string) (providerName string, err error) {
+func getArchitecture(metadata map[string]interface{}) (architectureName string, err error) {
+	if arch, ok := metadata["architecture"]; ok {
+		if architectureName, ok = arch.(string); ok && architectureName != "" {
+			return
+		}
+	}
+
+	return "", fmt.Errorf("Error: Could not determine architecture from box metadata.json file")
+}
+
+func getProvider(builderName, boxfile, builderId string, metadata map[string]interface{}) (string, error) {
 	if builderId == "artifice" {
 		// The artifice post processor cannot embed any data in the
 		// supplied artifact so the provider information must be extracted
 		// from the box file directly
-		providerName, err = providerFromVagrantBox(boxfile)
-	} else {
-		// For the Vagrant builder and Vagrant post processor the provider can
-		// be determined from information embedded in the artifact
-		providerName = providerFromBuilderName(builderName)
+		return providerFromVagrantBox(boxfile, metadata)
 	}
-	return providerName, err
+	// For the Vagrant builder and Vagrant post processor the provider can
+	// be determined from information embedded in the artifact
+	return providerFromBuilderName(builderName), nil
 }
 
 // Converts a packer builder name to the corresponding vagrant provider
@@ -255,56 +282,63 @@ func providerFromBuilderName(name string) string {
 
 // Returns the Vagrant provider the box is intended for use with by
 // reading the metadata file packaged inside the box
-func providerFromVagrantBox(boxfile string) (providerName string, err error) {
-	log.Println("Attempting to determine provider from metadata in box file. This may take some time...")
+func providerFromVagrantBox(boxfile string, metadata map[string]interface{}) (providerName string, err error) {
+	if len(metadata) == 0 {
+		if metadata, err = metadataFromVagrantBox(boxfile); err != nil {
+			return
+		}
+	}
+
+	if prov, ok := metadata["provider"]; ok {
+		if providerName, ok = prov.(string); ok && providerName != "" {
+			return
+		}
+	}
+
+	return "", fmt.Errorf("Error: Could not determine provider from box metadata.json file")
+}
+
+// Returns the metadata found within the metadata file
+// packaged inside the box
+func metadataFromVagrantBox(boxfile string) (metadata map[string]interface{}, err error) {
+	log.Printf("Attempting to extract metadata in box file. This may take some time...")
 
 	f, err := os.Open(boxfile)
 	if err != nil {
-		return "", fmt.Errorf("Error attempting to open box file: %s", err)
+		return nil, fmt.Errorf("Error attempting to open box file: %w", err)
 	}
 	defer f.Close()
 
 	// Vagrant boxes are gzipped tar archives
 	ar, err := gzip.NewReader(f)
 	if err != nil {
-		return "", fmt.Errorf("Error unzipping box archive: %s", err)
+		return nil, fmt.Errorf("Error unpacking box archive: %w", err)
 	}
 	tr := tar.NewReader(ar)
 
-	// The metadata.json file in the tar archive contains a 'provider' key
-	type metadata struct {
-		ProviderName string `json:"provider"`
-	}
-	md := metadata{}
-
-	// Loop through the files in the archive and read the provider
-	// information from the boxes metadata.json file
 	for {
-		hdr, err := tr.Next()
+		var hdr *tar.Header
+		hdr, err = tr.Next()
 		if err == io.EOF {
-			if md.ProviderName == "" {
-				return "", fmt.Errorf("Error: Provider info was not found in box: %s", boxfile)
-			}
-			break
+			return nil, fmt.Errorf("Error: metadata.json file not found in box: %s", boxfile)
 		}
-		if err != nil {
-			return "", fmt.Errorf("Error reading header info from box tar archive: %s", err)
+
+		if err != nil && err != io.EOF {
+			return nil, fmt.Errorf("Error reading header info from box tar archive: %w", err)
 		}
 
 		if hdr.Name == "metadata.json" {
-			contents, err := ioutil.ReadAll(tr)
+			var contents []byte
+			contents, err = ioutil.ReadAll(tr)
 			if err != nil {
-				return "", fmt.Errorf("Error reading contents of metadata.json file from box file: %s", err)
+				return nil, fmt.Errorf("Error reading contents of metadata.json file from box file: %w", err)
 			}
-			err = json.Unmarshal(contents, &md)
+			err = json.Unmarshal(contents, &metadata)
 			if err != nil {
-				return "", fmt.Errorf("Error parsing metadata.json file: %s", err)
+				return nil, fmt.Errorf("Error parsing metadata.json file: %w", err)
 			}
-			if md.ProviderName == "" {
-				return "", fmt.Errorf("Error: Could not determine Vagrant provider from box metadata.json file")
-			}
-			break
+
+			return
 		}
 	}
-	return md.ProviderName, nil
 }

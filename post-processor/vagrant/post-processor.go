@@ -15,6 +15,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"text/template"
 
@@ -44,6 +45,11 @@ var builtins = map[string]string{
 	"packer.post-processor.docker-import": "docker",
 	"packer.post-processor.docker-tag":    "docker",
 	"packer.post-processor.docker-push":   "docker",
+	"packer.file":                         "file",
+}
+
+var vagrantArchMap = map[string]string{
+	"386": "i386",
 }
 
 func availableProviders() []string {
@@ -71,6 +77,7 @@ type Config struct {
 	VagrantfileTemplate          string `mapstructure:"vagrantfile_template"`
 	VagrantfileTemplateGenerated bool   `mapstructure:"vagrantfile_template_generated"`
 	ProviderOverride             string `mapstructure:"provider_override"`
+	Architecture                 string `mapstructure:"architecture"`
 
 	ctx interpolate.Context
 }
@@ -86,6 +93,13 @@ func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec {
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if err := p.configureSingle(&p.config, raws...); err != nil {
 		return err
+	}
+
+	if p.config.Architecture == "" {
+		p.config.Architecture = runtime.GOARCH
+		if mappedArch, ok := vagrantArchMap[p.config.Architecture]; ok {
+			p.config.Architecture = mappedArch
+		}
 	}
 
 	if p.config.ProviderOverride != "" {
@@ -133,6 +147,7 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	generatedData["ArtifactId"] = artifact.Id()
 	generatedData["BuildName"] = config.PackerBuildName
 	generatedData["Provider"] = name
+	generatedData["Architecture"] = config.Architecture
 	config.ctx.Data = generatedData
 
 	outputPath, err := interpolate.Render(config.OutputPath, &config.ctx)
@@ -162,6 +177,9 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	if err != nil {
 		return nil, false, err
 	}
+
+	// Add architecture to metadata
+	metadata["architecture"] = config.Architecture
 
 	// Write the metadata we got
 	if err := WriteMetadata(dir, metadata); err != nil {
@@ -258,7 +276,7 @@ func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
 
 	// Defaults
 	if c.OutputPath == "" {
-		c.OutputPath = "packer_{{ .BuildName }}_{{.Provider}}.box"
+		c.OutputPath = "packer_{{ .BuildName }}_{{ .Provider }}_{{ .Architecture }}.box"
 	}
 
 	found := false
@@ -326,6 +344,8 @@ func providerForName(name string) Provider {
 		return new(AzureProvider)
 	case "docker":
 		return new(DockerProvider)
+	case "file":
+		return new(FileProvider)
 	default:
 		return nil
 	}

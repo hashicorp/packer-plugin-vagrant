@@ -243,7 +243,7 @@ func TestPostProcessor_Configure_checkAccessTokenIsNotRequiredForOverridenVagran
 	}
 }
 
-func TestPostProcessor_PostProcess_badChecksumSpec(t *testing.T) {
+func TestPostProcessor_PostProcess_missingArchitecture(t *testing.T) {
 	files := tarFiles{
 		{"foo.txt", "This is a foo file"},
 		{"bar.txt", "This is a bar file"},
@@ -258,6 +258,52 @@ func TestPostProcessor_PostProcess_badChecksumSpec(t *testing.T) {
 	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "mitchellh.post-processor.vagrant",
 		FilesValue:     []string{boxfile.Name()},
+		IdValue:        "virtualbox",
+	}
+
+	stack := []stubResponse{
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/authenticate"},
+	}
+
+	server := newStackServer(stack)
+	defer server.Close()
+
+	config := testGoodConfig()
+	config["vagrant_cloud_url"] = server.URL
+
+	var p PostProcessor
+
+	err = p.Configure(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	_, _, _, err = p.PostProcess(context.Background(), testUi(), artifact)
+	if err == nil {
+		t.Fatal("Expected missing architecture error")
+	}
+
+	if !strings.Contains(err.Error(), "not determine architecture") {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+}
+
+func TestPostProcessor_PostProcess_architectureConfigOnly(t *testing.T) {
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider": "virtualbox"}`},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	artifact := &packersdk.MockArtifact{
+		BuilderIdValue: "mitchellh.post-processor.vagrant",
+		FilesValue:     []string{boxfile.Name()},
+		IdValue:        "virtualbox",
 	}
 
 	s := newStackServer([]stubResponse{stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-path"}})
@@ -268,7 +314,149 @@ func TestPostProcessor_PostProcess_badChecksumSpec(t *testing.T) {
 		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
-		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/virtualbox/amd64/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
+		stubResponse{StatusCode: 200, Method: "PUT", Path: "/box/hashicorp/precise64/version/0.5/release"},
+	}
+
+	server := newStackServer(stack)
+	defer server.Close()
+	config := testGoodConfig()
+	config["vagrant_cloud_url"] = server.URL
+	config["no_direct_upload"] = true
+	config["architecture"] = "amd64"
+
+	var p PostProcessor
+
+	err = p.Configure(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	_, _, _, err = p.PostProcess(context.Background(), testUi(), artifact)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestPostProcessor_PostProcess_architectureConfigOverrides(t *testing.T) {
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	artifact := &packersdk.MockArtifact{
+		BuilderIdValue: "mitchellh.post-processor.vagrant",
+		FilesValue:     []string{boxfile.Name()},
+		IdValue:        "virtualbox",
+	}
+
+	s := newStackServer([]stubResponse{stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-path"}})
+	defer s.Close()
+
+	stack := []stubResponse{
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/authenticate"},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/virtualbox/arm64/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
+		stubResponse{StatusCode: 200, Method: "PUT", Path: "/box/hashicorp/precise64/version/0.5/release"},
+	}
+
+	server := newStackServer(stack)
+	defer server.Close()
+	config := testGoodConfig()
+	config["vagrant_cloud_url"] = server.URL
+	config["no_direct_upload"] = true
+	config["architecture"] = "arm64"
+
+	var p PostProcessor
+
+	err = p.Configure(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	_, _, _, err = p.PostProcess(context.Background(), testUi(), artifact)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestPostProcessor_PostProcess_noArchitecture(t *testing.T) {
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider": "virtualbox"}`},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	artifact := &packersdk.MockArtifact{
+		BuilderIdValue: "mitchellh.post-processor.vagrant",
+		FilesValue:     []string{boxfile.Name()},
+		IdValue:        "virtualbox",
+	}
+
+	stack := []stubResponse{
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/authenticate"},
+	}
+
+	server := newStackServer(stack)
+	defer server.Close()
+	config := testGoodConfig()
+	config["vagrant_cloud_url"] = server.URL
+
+	var p PostProcessor
+
+	err = p.Configure(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	_, _, _, err = p.PostProcess(context.Background(), testUi(), artifact)
+
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	if !strings.Contains(err.Error(), "not determine architecture") {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+}
+
+func TestPostProcessor_PostProcess_badChecksumSpec(t *testing.T) {
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	artifact := &packersdk.MockArtifact{
+		BuilderIdValue: "mitchellh.post-processor.vagrant",
+		FilesValue:     []string{boxfile.Name()},
+		IdValue:        "virtualbox",
+	}
+
+	s := newStackServer([]stubResponse{stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-path"}})
+	defer s.Close()
+
+	stack := []stubResponse{
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/authenticate"},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/virtualbox/amd64/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
 	}
 
 	server := newStackServer(stack)
@@ -334,7 +522,7 @@ func TestPostProcessor_PostProcess_uploadsAndReleases(t *testing.T) {
 	files := tarFiles{
 		{"foo.txt", "This is a foo file"},
 		{"bar.txt", "This is a bar file"},
-		{"metadata.json", `{"provider": "virtualbox"}`},
+		{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
 	}
 	boxfile, err := createBox(files)
 	if err != nil {
@@ -345,6 +533,7 @@ func TestPostProcessor_PostProcess_uploadsAndReleases(t *testing.T) {
 	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "mitchellh.post-processor.vagrant",
 		FilesValue:     []string{boxfile.Name()},
+		IdValue:        "virtualbox",
 	}
 
 	s := newStackServer([]stubResponse{stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-path"}})
@@ -355,7 +544,7 @@ func TestPostProcessor_PostProcess_uploadsAndReleases(t *testing.T) {
 		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
-		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/virtualbox/amd64/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
 		stubResponse{StatusCode: 200, Method: "PUT", Path: "/box/hashicorp/precise64/version/0.5/release"},
 	}
 
@@ -381,7 +570,7 @@ func TestPostProcessor_PostProcess_uploadsAndNoRelease(t *testing.T) {
 	files := tarFiles{
 		{"foo.txt", "This is a foo file"},
 		{"bar.txt", "This is a bar file"},
-		{"metadata.json", `{"provider": "virtualbox"}`},
+		{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
 	}
 	boxfile, err := createBox(files)
 	if err != nil {
@@ -392,6 +581,7 @@ func TestPostProcessor_PostProcess_uploadsAndNoRelease(t *testing.T) {
 	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "mitchellh.post-processor.vagrant",
 		FilesValue:     []string{boxfile.Name()},
+		IdValue:        "virtualbox",
 	}
 
 	s := newStackServer([]stubResponse{stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-path"}})
@@ -402,7 +592,7 @@ func TestPostProcessor_PostProcess_uploadsAndNoRelease(t *testing.T) {
 		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
-		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/virtualbox/amd64/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
 	}
 
 	server := newStackServer(stack)
@@ -437,7 +627,7 @@ func TestPostProcessor_PostProcess_directUpload5GFile(t *testing.T) {
 	files := tarFiles{
 		{"foo.txt", "This is a foo file"},
 		{"bar.txt", "This is a bar file"},
-		{"metadata.json", `{"provider": "virtualbox"}`},
+		{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
 	}
 	f, err := createBox(files)
 	if err != nil {
@@ -452,6 +642,7 @@ func TestPostProcessor_PostProcess_directUpload5GFile(t *testing.T) {
 	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "mitchellh.post-processor.vagrant",
 		FilesValue:     []string{f.Name()},
+		IdValue:        "virtualbox",
 	}
 	f.Close()
 
@@ -467,7 +658,7 @@ func TestPostProcessor_PostProcess_directUpload5GFile(t *testing.T) {
 		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
-		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload/direct"},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/virtualbox/amd64/upload/direct"},
 		stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-complete"},
 	}
 
@@ -505,7 +696,7 @@ func TestPostProcessor_PostProcess_directUploadOver5GFile(t *testing.T) {
 	files := tarFiles{
 		{"foo.txt", "This is a foo file"},
 		{"bar.txt", "This is a bar file"},
-		{"metadata.json", `{"provider": "virtualbox"}`},
+		{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
 	}
 	f, err := createBox(files)
 	if err != nil {
@@ -521,6 +712,7 @@ func TestPostProcessor_PostProcess_directUploadOver5GFile(t *testing.T) {
 	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "mitchellh.post-processor.vagrant",
 		FilesValue:     []string{f.Name()},
+		IdValue:        "virtualbox",
 	}
 
 	s := newStackServer(
@@ -535,7 +727,7 @@ func TestPostProcessor_PostProcess_directUploadOver5GFile(t *testing.T) {
 		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
-		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/virtualbox/amd64/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
 	}
 
 	server := newStackServer(stack)
@@ -561,7 +753,7 @@ func TestPostProcessor_PostProcess_uploadsDirectAndReleases(t *testing.T) {
 	files := tarFiles{
 		{"foo.txt", "This is a foo file"},
 		{"bar.txt", "This is a bar file"},
-		{"metadata.json", `{"provider": "virtualbox"}`},
+		{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
 	}
 	boxfile, err := createBox(files)
 	if err != nil {
@@ -572,6 +764,7 @@ func TestPostProcessor_PostProcess_uploadsDirectAndReleases(t *testing.T) {
 	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "mitchellh.post-processor.vagrant",
 		FilesValue:     []string{boxfile.Name()},
+		IdValue:        "virtualbox",
 	}
 
 	s := newStackServer(
@@ -586,7 +779,7 @@ func TestPostProcessor_PostProcess_uploadsDirectAndReleases(t *testing.T) {
 		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
 		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
-		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload/direct"},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/virtualbox/amd64/upload/direct"},
 		stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-complete"},
 		stubResponse{StatusCode: 200, Method: "PUT", Path: "/box/hashicorp/precise64/version/0.5/release"},
 	}
@@ -636,7 +829,8 @@ func TestProviderFromBuilderName(t *testing.T) {
 func TestProviderFromVagrantBox_missing_box(t *testing.T) {
 	// Bad: Box does not exist
 	boxfile := "i_dont_exist.box"
-	_, err := providerFromVagrantBox(boxfile)
+
+	_, err := providerFromVagrantBox(boxfile, map[string]interface{}{})
 	if err == nil {
 		t.Fatal("Should have error as box file does not exist")
 	}
@@ -651,7 +845,7 @@ func TestProviderFromVagrantBox_empty_box(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	_, err = providerFromVagrantBox(boxfile.Name())
+	_, err = providerFromVagrantBox(boxfile.Name(), map[string]interface{}{})
 	if err == nil {
 		t.Fatal("Should have error as box file is empty")
 	}
@@ -673,7 +867,7 @@ func TestProviderFromVagrantBox_gzip_only_box(t *testing.T) {
 	}
 	aw.Close() // Flush the gzipped contents to file
 
-	_, err = providerFromVagrantBox(boxfile.Name())
+	_, err = providerFromVagrantBox(boxfile.Name(), map[string]interface{}{})
 	if err == nil {
 		t.Fatalf("Should have error as box file is a plain gzip file: %s", err)
 	}
@@ -688,7 +882,7 @@ func TestProviderFromVagrantBox_no_files_in_archive(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	_, err = providerFromVagrantBox(boxfile.Name())
+	_, err = providerFromVagrantBox(boxfile.Name(), map[string]interface{}{})
 	if err == nil {
 		t.Fatalf("Should have error as box file has no contents")
 	}
@@ -707,7 +901,7 @@ func TestProviderFromVagrantBox_no_metadata(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	_, err = providerFromVagrantBox(boxfile.Name())
+	_, err = providerFromVagrantBox(boxfile.Name(), map[string]interface{}{})
 	if err == nil {
 		t.Fatalf("Should have error as box file does not include metadata.json file")
 	}
@@ -727,7 +921,7 @@ func TestProviderFromVagrantBox_metadata_empty(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	_, err = providerFromVagrantBox(boxfile.Name())
+	_, err = providerFromVagrantBox(boxfile.Name(), map[string]interface{}{})
 	if err == nil {
 		t.Fatalf("Should have error as box files metadata.json file is empty")
 	}
@@ -747,7 +941,7 @@ func TestProviderFromVagrantBox_metadata_bad_json(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	_, err = providerFromVagrantBox(boxfile.Name())
+	_, err = providerFromVagrantBox(boxfile.Name(), map[string]interface{}{})
 	if err == nil {
 		t.Fatalf("Should have error as box files metadata.json file contains badly formatted JSON")
 	}
@@ -767,7 +961,7 @@ func TestProviderFromVagrantBox_metadata_no_provider_key(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	_, err = providerFromVagrantBox(boxfile.Name())
+	_, err = providerFromVagrantBox(boxfile.Name(), map[string]interface{}{})
 	if err == nil {
 		t.Fatalf("Should have error as provider key/value pair is missing from boxes metadata.json file")
 	}
@@ -779,7 +973,7 @@ func TestProviderFromVagrantBox_metadata_provider_value_empty(t *testing.T) {
 	files := tarFiles{
 		{"foo.txt", "This is a foo file"},
 		{"bar.txt", "This is a bar file"},
-		{"metadata.json", `{"provider":""}`},
+		{"metadata.json", `{"provider":"", "architecture": "amd64"}`},
 	}
 	boxfile, err := createBox(files)
 	if err != nil {
@@ -787,7 +981,7 @@ func TestProviderFromVagrantBox_metadata_provider_value_empty(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	_, err = providerFromVagrantBox(boxfile.Name())
+	_, err = providerFromVagrantBox(boxfile.Name(), map[string]interface{}{})
 	if err == nil {
 		t.Fatalf("Should have error as value associated with 'provider' key in boxes metadata.json file is empty")
 	}
@@ -800,7 +994,7 @@ func TestProviderFromVagrantBox_metadata_ok(t *testing.T) {
 	files := tarFiles{
 		{"foo.txt", "This is a foo file"},
 		{"bar.txt", "This is a bar file"},
-		{"metadata.json", `{"provider":"` + expectedProvider + `"}`},
+		{"metadata.json", `{"provider":"` + expectedProvider + `", "architecture": "amd64"}`},
 	}
 	boxfile, err := createBox(files)
 	if err != nil {
@@ -808,7 +1002,7 @@ func TestProviderFromVagrantBox_metadata_ok(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	provider, err := providerFromVagrantBox(boxfile.Name())
+	provider, err := providerFromVagrantBox(boxfile.Name(), map[string]interface{}{})
 	if err != nil {
 		t.Fatalf("error getting provider from vagrant box %s:%v", boxfile.Name(), err)
 	}
@@ -821,7 +1015,7 @@ func TestGetProvider_artifice(t *testing.T) {
 	files := tarFiles{
 		{"foo.txt", "This is a foo file"},
 		{"bar.txt", "This is a bar file"},
-		{"metadata.json", `{"provider":"` + expectedProvider + `"}`},
+		{"metadata.json", `{"provider":"` + expectedProvider + `", "architecture": "amd64"}`},
 	}
 	boxfile, err := createBox(files)
 	if err != nil {
@@ -829,7 +1023,7 @@ func TestGetProvider_artifice(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	provider, err := getProvider("", boxfile.Name(), "artifice")
+	provider, err := getProvider("", boxfile.Name(), "artifice", map[string]interface{}{})
 	if err != nil {
 		t.Fatalf("error getting provider %s:%v", boxfile.Name(), err)
 	}
@@ -840,7 +1034,7 @@ func TestGetProvider_artifice(t *testing.T) {
 func TestGetProvider_other(t *testing.T) {
 	expectedProvider := "virtualbox"
 
-	provider, _ := getProvider(expectedProvider, "foo.box", "other")
+	provider, _ := getProvider(expectedProvider, "foo.box", "other", map[string]interface{}{})
 	assert.Equal(t, expectedProvider, provider, "Error: Expected provider: '%s'. Got '%s'", expectedProvider, provider)
 	t.Logf("Expected provider '%s'. Got provider '%s'", expectedProvider, provider)
 }

@@ -14,12 +14,14 @@ import (
 )
 
 type Provider struct {
-	Name         string `json:"name"`
-	Url          string `json:"url,omitempty"`
-	HostedToken  string `json:"hosted_token,omitempty"`
-	UploadUrl    string `json:"upload_url,omitempty"`
-	Checksum     string `json:"checksum,omitempty"`
-	ChecksumType string `json:"checksum_type,omitempty"`
+	Name                string `json:"name"`
+	Url                 string `json:"url,omitempty"`
+	HostedToken         string `json:"hosted_token,omitempty"`
+	UploadUrl           string `json:"upload_url,omitempty"`
+	Checksum            string `json:"checksum,omitempty"`
+	ChecksumType        string `json:"checksum_type,omitempty"`
+	Architecture        string `json:"architecture,omitempty"`
+	DefaultArchitecture bool   `json:"default_architecture,omitempty"`
 }
 
 type stepCreateProvider struct {
@@ -34,10 +36,16 @@ func (s *stepCreateProvider) Run(ctx context.Context, state multistep.StateBag) 
 	providerName := state.Get("providerName").(string)
 	downloadUrl := state.Get("boxDownloadUrl").(string)
 	checksum := state.Get("boxChecksum").(string)
+	architecture := state.Get("architecture").(string)
+	defaultArchitecture := state.Get("defaultArchitecture").(bool)
 
 	path := fmt.Sprintf("box/%s/version/%v/providers", box.Tag, version.Version)
 
-	provider := &Provider{Name: providerName}
+	provider := &Provider{
+		Name:                providerName,
+		Architecture:        architecture,
+		DefaultArchitecture: defaultArchitecture,
+	}
 
 	if downloadUrl != "" {
 		provider.Url = downloadUrl
