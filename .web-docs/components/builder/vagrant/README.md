@@ -101,6 +101,8 @@ the Compress post-processor will not work with this builder.
   be found here. The template variables available to you are
   `{{ .BoxName }}`, `{{ .SyncedFolder }}`, and `{{.InsertKey}}`, which
   correspond to the Packer options box_name, synced_folder, and insert_key.
+  Alternatively, the template variable `{{.DefaultTemplate}}` is available for
+  use if you wish to extend the default generated template.
 
 - `synced_folder` (string) - Path to the folder to be synced to the guest. The path can be absolute
   or relative to the directory Packer is being run from.
