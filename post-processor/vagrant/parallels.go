@@ -43,11 +43,11 @@ func (p *ParallelsProvider) Process(ui packersdk.Ui, artifact packersdk.Artifact
 		}
 
 		tmpPath := filepath.ToSlash(path)
-		pathRe := regexp.MustCompile(`^(.+?)([^/]+\.(pvm|macvm)/.+?)$`)
-		matches := pathRe.FindStringSubmatch(tmpPath)
+		pathRe := regexp.MustCompile(`[^/]+\.(pvm|macvm)/.+$`)
+		match := pathRe.FindString(tmpPath)
 		var pvmPath string
-		if matches != nil {
-			pvmPath = filepath.FromSlash(matches[2])
+		if match != "" {
+			pvmPath = filepath.FromSlash(match)
 		} else {
 			continue // Just copy a pvm
 		}
