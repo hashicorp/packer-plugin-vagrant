@@ -25,6 +25,8 @@ func (p *ParallelsProvider) Process(ui packersdk.Ui, artifact packersdk.Artifact
 	// Create the metadata
 	metadata = map[string]interface{}{"provider": "parallels"}
 
+	var copied int
+
 	// Copy all of the original contents into the temporary directory
 	for _, path := range artifact.Files() {
 		// If the file isn't critical to the function of the
@@ -55,6 +57,11 @@ func (p *ParallelsProvider) Process(ui packersdk.Ui, artifact packersdk.Artifact
 		if err = CopyContents(dstPath, path); err != nil {
 			return
 		}
+		copied++
+	}
+
+	if copied == 0 {
+		err = fmt.Errorf("No VM file found in source artifact")
 	}
 
 	return
