@@ -54,7 +54,7 @@ type Config struct {
 	// the global id of a Vagrant box already added to Vagrant on your system.
 	// You can find the global id of your Vagrant boxes using the command
 	// vagrant global-status; your global_id will be a 7-digit number and
-	// letter comination that you'll find in the leftmost column of the
+	// letter combination that you'll find in the leftmost column of the
 	// global-status output.  If you choose to use global_id instead of
 	// source_box, Packer will skip the Vagrant initialize and add steps, and
 	// simply launch the box directly using the global id.
@@ -102,7 +102,7 @@ type Config struct {
 	// What box version to use when initializing Vagrant.
 	BoxVersion string `mapstructure:"box_version" required:"false"`
 	// a path to a golang template for a vagrantfile. Our default template can
-	// be found here. The template variables available to you are
+	// be found [here](https://github.com/hashicorp/packer-plugin-vagrant/blob/main/builder/vagrant/step_create_vagrantfile.go#L39-L54). The template variables available to you are
 	// `{{ .BoxName }}`, `{{ .SyncedFolder }}`, and `{{.InsertKey}}`, which
 	// correspond to the Packer options box_name, synced_folder, and insert_key.
 	// Alternatively, the template variable `{{.DefaultTemplate}}` is available for
