@@ -98,7 +98,7 @@ the Compress post-processor will not work with this builder.
 - `box_version` (string) - What box version to use when initializing Vagrant.
 
 - `template` (string) - a path to a golang template for a vagrantfile. Our default template can
-  be found here. The template variables available to you are
+  be found [here](https://github.com/hashicorp/packer-plugin-vagrant/blob/main/builder/vagrant/step_create_vagrantfile.go#L39-L54). The template variables available to you are
   `{{ .BoxName }}`, `{{ .SyncedFolder }}`, and `{{.InsertKey}}`, which
   correspond to the Packer options box_name, synced_folder, and insert_key.
   Alternatively, the template variable `{{.DefaultTemplate}}` is available for
