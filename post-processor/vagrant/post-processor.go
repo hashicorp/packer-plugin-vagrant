@@ -75,6 +75,7 @@ type Config struct {
 	OutputPath                   string   `mapstructure:"output"`
 	Override                     map[string]interface{}
 	VagrantfileTemplate          string `mapstructure:"vagrantfile_template"`
+	VagrantfileTemplateContent   string `mapstructure:"vagrantfile_template_content"`
 	VagrantfileTemplateGenerated bool   `mapstructure:"vagrantfile_template_generated"`
 	ProviderOverride             string `mapstructure:"provider_override"`
 	Architecture                 string `mapstructure:"architecture"`
@@ -190,12 +191,20 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	var customVagrantfile string
 	if config.VagrantfileTemplate != "" {
 		ui.Message(fmt.Sprintf("Using custom Vagrantfile: %s", config.VagrantfileTemplate))
-		customBytes, err := ioutil.ReadFile(config.VagrantfileTemplate)
-		if err != nil {
-			return nil, false, err
+
+		var templateContent string
+		if config.VagrantfileTemplateContent != "" {
+			templateContent = config.VagrantfileTemplateContent
+		} else {
+			customBytes, err := ioutil.ReadFile(config.VagrantfileTemplate)
+			if err != nil {
+				return nil, false, err
+			}
+
+			templateContent = string(customBytes)
 		}
 
-		customVagrantfile, err = interpolate.Render(string(customBytes), &config.ctx)
+		customVagrantfile, err = interpolate.Render(templateContent, &config.ctx)
 		if err != nil {
 			return nil, false, err
 		}
@@ -292,6 +301,10 @@ func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
 	}
 
 	var errs *packersdk.MultiError
+	if c.VagrantfileTemplateContent != "" && c.VagrantfileTemplate == "" {
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf(
+			"'vagrantfile_template' should be provided to use 'vagrantfile_template_content'"))
+	}
 	if c.VagrantfileTemplate != "" && c.VagrantfileTemplateGenerated == false {
 		_, err := os.Stat(c.VagrantfileTemplate)
 		if err != nil {
