@@ -94,8 +94,6 @@ type Config struct {
 	Provider string `mapstructure:"provider" required:"false"`
 	// Options for the "vagrant init" command
 
-	// What vagrantfile to use
-	VagrantfileTpl string `mapstructure:"vagrantfile_template"`
 	// Whether to halt, suspend, or destroy the box when the build has
 	// completed. Defaults to "halt"
 	TeardownMethod string `mapstructure:"teardown_method" required:"false"`

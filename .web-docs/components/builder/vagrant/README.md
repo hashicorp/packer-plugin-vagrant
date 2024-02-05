@@ -90,8 +90,6 @@ the Compress post-processor will not work with this builder.
   This parameter is required when source_path have more than one provider,
   or when using vagrant-cloud post-processor. Defaults to unset.
 
-- `vagrantfile_template` (string) - What vagrantfile to use
-
 - `teardown_method` (string) - Whether to halt, suspend, or destroy the box when the build has
   completed. Defaults to "halt"
 

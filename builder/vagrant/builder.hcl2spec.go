@@ -92,7 +92,6 @@ type FlatConfig struct {
 	BoxName                   *string           `mapstructure:"box_name" required:"false" cty:"box_name" hcl:"box_name"`
 	InsertKey                 *bool             `mapstructure:"insert_key" required:"false" cty:"insert_key" hcl:"insert_key"`
 	Provider                  *string           `mapstructure:"provider" required:"false" cty:"provider" hcl:"provider"`
-	VagrantfileTpl            *string           `mapstructure:"vagrantfile_template" cty:"vagrantfile_template" hcl:"vagrantfile_template"`
 	TeardownMethod            *string           `mapstructure:"teardown_method" required:"false" cty:"teardown_method" hcl:"teardown_method"`
 	BoxVersion                *string           `mapstructure:"box_version" required:"false" cty:"box_version" hcl:"box_version"`
 	Template                  *string           `mapstructure:"template" required:"false" cty:"template" hcl:"template"`
@@ -203,7 +202,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"box_name":                     &hcldec.AttrSpec{Name: "box_name", Type: cty.String, Required: false},
 		"insert_key":                   &hcldec.AttrSpec{Name: "insert_key", Type: cty.Bool, Required: false},
 		"provider":                     &hcldec.AttrSpec{Name: "provider", Type: cty.String, Required: false},
-		"vagrantfile_template":         &hcldec.AttrSpec{Name: "vagrantfile_template", Type: cty.String, Required: false},
 		"teardown_method":              &hcldec.AttrSpec{Name: "teardown_method", Type: cty.String, Required: false},
 		"box_version":                  &hcldec.AttrSpec{Name: "box_version", Type: cty.String, Required: false},
 		"template":                     &hcldec.AttrSpec{Name: "template", Type: cty.String, Required: false},
