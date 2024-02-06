@@ -270,7 +270,7 @@ func (d *Vagrant_2_2_Driver) vagrantCmd(args ...string) (string, string, error) 
 		log.Printf("[vagrant driver] stdout: %s", line)
 		stdoutString += line + "\n"
 	}
-	_ = cmd.Wait()
+	err = cmd.Wait()
 
 	if _, ok := err.(*exec.ExitError); ok {
 		err = fmt.Errorf("Vagrant error: %s", stderrString)
