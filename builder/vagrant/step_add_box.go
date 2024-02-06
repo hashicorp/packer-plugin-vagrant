@@ -5,6 +5,7 @@ package vagrant
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 
@@ -93,6 +94,7 @@ func (s *StepAddBox) Run(ctx context.Context, state multistep.StateBag) multiste
 	// Call vagrant using prepared arguments
 	err := driver.Add(addArgs)
 	if err != nil {
+		err = fmt.Errorf("Failed to get box, if it is already in Vagrant, try using the `skip_add` option.\n%s", err)
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
