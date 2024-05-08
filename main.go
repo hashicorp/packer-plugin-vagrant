@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 
 	vagrantB "github.com/hashicorp/packer-plugin-vagrant/builder/vagrant"
+	vagrantRegistryPP "github.com/hashicorp/packer-plugin-vagrant/post-processor/hcp-vagrant-registry"
 	vagrantPP "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant"
 	vagrantCloudPP "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant-cloud"
 	"github.com/hashicorp/packer-plugin-vagrant/version"
@@ -20,6 +21,7 @@ func main() {
 	pps.RegisterBuilder(plugin.DEFAULT_NAME, new(vagrantB.Builder))
 	pps.RegisterPostProcessor(plugin.DEFAULT_NAME, new(vagrantPP.PostProcessor))
 	pps.RegisterPostProcessor("cloud", new(vagrantCloudPP.PostProcessor))
+	pps.RegisterPostProcessor("registry", new(vagrantRegistryPP.PostProcessor))
 	pps.SetVersion(version.PluginVersion)
 	err := pps.Run()
 	if err != nil {
