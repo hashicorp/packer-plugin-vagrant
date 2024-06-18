@@ -14,12 +14,17 @@ integration {
   }
   component {
     type = "post-processor"
+    name = "Vagrant"
+    slug = "vagrant"
+  }
+  component {
+    type = "post-processor"
     name = "Vagrant Cloud"
     slug = "vagrant-cloud"
   }
   component {
     type = "post-processor"
-    name = "Vagrant"
-    slug = "vagrant"
+    name = "Vagrant Registry"
+    slug = "vagrant-registry"
   }
 }
