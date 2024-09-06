@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-operation/stable/2020-05-05/client/operation_service"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-vagrant-box-registry/stable/2022-09-30/client"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-vagrant-box-registry/stable/2022-09-30/client/registry_service"
 	hcpconfig "github.com/hashicorp/hcp-sdk-go/config"
@@ -285,6 +286,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &p.config)
 	state.Put("client", registry_service.New(p.client.Transport, nil))
+	state.Put("operation-client", operation_service.New(p.client.Transport, nil))
 	state.Put("artifact", artifact)
 	state.Put("artifactFilePath", artifact.Files()[0])
 	state.Put("ui", ui)

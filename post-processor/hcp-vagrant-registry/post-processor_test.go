@@ -381,7 +381,7 @@ func TestPostProcessor(t *testing.T) {
 				wantErr: "Invalid response body",
 			},
 			{
-				desc: "OK - creates box when missing",
+				desc: "Invalid - creates box when missing - no operation provided",
 				stack: []stubResponse{
 					{
 						Method:     "POST",
@@ -398,6 +398,176 @@ func TestPostProcessor(t *testing.T) {
 						Method:     "POST",
 						Path:       "/vagrant/2022-09-30/registry/hashicorp/boxes",
 						Response:   `{}`,
+						StatusCode: 200,
+					},
+				},
+				files: tarFiles{
+					{"foo.txt", "This is a foo file"},
+					{"bar.txt", "This is a bar file"},
+					{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
+				},
+				wantErr: "Unable to wait for box to become available - Please check HCP Vagrant for box status, and try again.",
+			},
+			{
+				desc: "Invalid - creates box when missing - operation service error",
+				stack: []stubResponse{
+					{
+						Method:     "POST",
+						Path:       "/oauth2/token",
+						Response:   `{"access_token": "TEST_TOKEN", "expiry": 0}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64",
+						StatusCode: 404,
+					},
+					{
+						Method:     "POST",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/boxes",
+						Response:   `{"operation": {"id": "OP-ID", "location": {"organization_id": "ORG-ID", "project_id": "PROJ-ID"}}}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/operation/2020-05-05/organizations/ORG-ID/projects/PROJ-ID/operations/OP-ID/wait",
+						Response:   `{}`,
+						StatusCode: 500,
+					},
+				},
+				files: tarFiles{
+					{"foo.txt", "This is a foo file"},
+					{"bar.txt", "This is a bar file"},
+					{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
+				},
+				wantErr: "Unexpected error encountered",
+			},
+			{
+				desc: "Invalid - creates box when missing - no operation data",
+				stack: []stubResponse{
+					{
+						Method:     "POST",
+						Path:       "/oauth2/token",
+						Response:   `{"access_token": "TEST_TOKEN", "expiry": 0}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64",
+						StatusCode: 404,
+					},
+					{
+						Method:     "POST",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/boxes",
+						Response:   `{"operation": {"id": "OP-ID", "location": {"organization_id": "ORG-ID", "project_id": "PROJ-ID"}}}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/operation/2020-05-05/organizations/ORG-ID/projects/PROJ-ID/operations/OP-ID/wait",
+						Response:   `{}`,
+						StatusCode: 200,
+					},
+				},
+				files: tarFiles{
+					{"foo.txt", "This is a foo file"},
+					{"bar.txt", "This is a bar file"},
+					{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
+				},
+				wantErr: "Unable to check box creation operation status - Please check HCP Vagrant for box status, and try again.",
+			},
+			{
+				desc: "Invalid - creates box when missing - operation reported error",
+				stack: []stubResponse{
+					{
+						Method:     "POST",
+						Path:       "/oauth2/token",
+						Response:   `{"access_token": "TEST_TOKEN", "expiry": 0}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64",
+						StatusCode: 404,
+					},
+					{
+						Method:     "POST",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/boxes",
+						Response:   `{"operation": {"id": "OP-ID", "location": {"organization_id": "ORG-ID", "project_id": "PROJ-ID"}}}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/operation/2020-05-05/organizations/ORG-ID/projects/PROJ-ID/operations/OP-ID/wait",
+						Response:   `{"operation": {"error": {"message": "testing error"}}}`,
+						StatusCode: 200,
+					},
+				},
+				files: tarFiles{
+					{"foo.txt", "This is a foo file"},
+					{"bar.txt", "This is a bar file"},
+					{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
+				},
+				wantErr: "Box creation operation reported a failure: testing error - Please try again.",
+			},
+			{
+				desc: "Invalid - creates box when missing - operation not done",
+				stack: []stubResponse{
+					{
+						Method:     "POST",
+						Path:       "/oauth2/token",
+						Response:   `{"access_token": "TEST_TOKEN", "expiry": 0}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64",
+						StatusCode: 404,
+					},
+					{
+						Method:     "POST",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/boxes",
+						Response:   `{"operation": {"id": "OP-ID", "location": {"organization_id": "ORG-ID", "project_id": "PROJ-ID"}}}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/operation/2020-05-05/organizations/ORG-ID/projects/PROJ-ID/operations/OP-ID/wait",
+						Response:   `{"operation": {"state": "RUNNING"}}`,
+						StatusCode: 200,
+					},
+				},
+				files: tarFiles{
+					{"foo.txt", "This is a foo file"},
+					{"bar.txt", "This is a bar file"},
+					{"metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
+				},
+				wantErr: "Timeout exceeded waiting for box to become available - Please verify box creation in HCP Vagrant and try again.",
+			},
+			{
+				desc: "OK - creates box when missing",
+				stack: []stubResponse{
+					{
+						Method:     "POST",
+						Path:       "/oauth2/token",
+						Response:   `{"access_token": "TEST_TOKEN", "expiry": 0}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64",
+						StatusCode: 404,
+					},
+					{
+						Method:     "POST",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/boxes",
+						Response:   `{"operation": {"id": "OP-ID", "location": {"organization_id": "ORG-ID", "project_id": "PROJ-ID"}}}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/operation/2020-05-05/organizations/ORG-ID/projects/PROJ-ID/operations/OP-ID/wait",
+						Response:   `{"operation": {"state": "DONE"}}`,
 						StatusCode: 200,
 					},
 					{
