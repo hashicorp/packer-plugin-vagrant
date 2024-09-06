@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-vagrant-box-registry/stable/2022-09-30/client/registry_service"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type stepConfirmUpload struct{}
@@ -16,6 +17,7 @@ type stepConfirmUpload struct{}
 func (s *stepConfirmUpload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*registry_service.Client)
 	config := state.Get("config").(*Config)
+	ui := state.Get("ui").(packer.Ui)
 
 	if config.NoDirectUpload {
 		return multistep.ActionContinue
@@ -24,6 +26,8 @@ func (s *stepConfirmUpload) Run(ctx context.Context, state multistep.StateBag) m
 	providerName := state.Get("providerName").(string)
 	archName := state.Get("architecture").(string)
 	object := state.Get("upload-object").(string)
+
+	ui.Say("Completing box upload...")
 
 	_, err := client.CompleteDirectUploadBox(
 		&registry_service.CompleteDirectUploadBoxParams{
