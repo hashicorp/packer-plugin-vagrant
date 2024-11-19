@@ -42,7 +42,7 @@ type Config struct {
 	Comm communicator.Config `mapstructure:",squash"`
 	// The directory to create that will contain your output box. We always
 	// create this directory and run from inside of it to prevent Vagrant init
-	// collisions. If unset, it will be set to packer- plus your buildname.
+	// collisions. If unset, it will be set to output- plus your buildname.
 	OutputDir string `mapstructure:"output_dir" required:"false"`
 	// URL of the vagrant box to use, or the name of the vagrant box.
 	// hashicorp/precise64, ./mylocalbox.box and <https://example.com/my-box.box>
