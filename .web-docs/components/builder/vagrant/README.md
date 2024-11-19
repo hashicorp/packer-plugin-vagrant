@@ -20,7 +20,7 @@ setting the `teardown_method` option. You can change the behavior so the builder
 doesn't package it (not all provisioners support the `vagrant package` command)
 by setting the `skip package` option. You can also change the behavior so that
 rather than initializing a new Vagrant workspace, you use an already defined
-one, by using `global_id` instead of `source_box`.
+one, by using `global_id` instead of `source_path`.
 
 Please note that if you are using the Vagrant builder, then the Vagrant
 post-processor is unnecessary because the output of the Vagrant builder is
@@ -46,7 +46,7 @@ the Compress post-processor will not work with this builder.
   command `vagrant global-status`; your global_id will be a 7-digit number and
   letter combination that you'll find in the leftmost column of the
   global-status output. If you choose to use `global_id` instead of
-  `source_box`, Packer will skip the Vagrant initialize and add steps, and
+  `source_path`, Packer will skip the Vagrant initialize and add steps, and
   simply launch the box directly using the global id.
 
 ### Optional
@@ -55,7 +55,7 @@ the Compress post-processor will not work with this builder.
 
 - `output_dir` (string) - The directory to create that will contain your output box. We always
   create this directory and run from inside of it to prevent Vagrant init
-  collisions. If unset, it will be set to packer- plus your buildname.
+  collisions. If unset, it will be set to output- plus your buildname.
 
 - `checksum` (string) - The checksum for the .box file. The type of the checksum is specified
   within the checksum field as a prefix, ex: "md5:{$checksum}". The type
@@ -78,7 +78,7 @@ the Compress post-processor will not work with this builder.
   this is not recommended since these files can be very large and
   corruption does happen from time to time.
 
-- `box_name` (string) - if your source_box is a boxfile that we need to add to Vagrant, this is
+- `box_name` (string) - if your "source_path" is a boxfile that we need to add to Vagrant, this is
   the name to give it. If left blank, will default to "packer_" plus your
   buildname.
 
@@ -105,7 +105,7 @@ the Compress post-processor will not work with this builder.
 - `synced_folder` (string) - Path to the folder to be synced to the guest. The path can be absolute
   or relative to the directory Packer is being run from.
 
-- `skip_add` (bool) - Don't call "vagrant add" to add the box to your local environment; this
+- `skip_add` (bool) - Don't call "vagrant box add" to add the box to your local environment; this
   is necessary if you want to launch a box that is already added to your
   vagrant environment.
 
