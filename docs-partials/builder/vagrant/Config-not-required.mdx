@@ -2,7 +2,7 @@
 
 - `output_dir` (string) - The directory to create that will contain your output box. We always
   create this directory and run from inside of it to prevent Vagrant init
-  collisions. If unset, it will be set to packer- plus your buildname.
+  collisions. If unset, it will be set to output- plus your buildname.
 
 - `checksum` (string) - The checksum for the .box file. The type of the checksum is specified
   within the checksum field as a prefix, ex: "md5:{$checksum}". The type
@@ -25,7 +25,7 @@
   this is not recommended since these files can be very large and
   corruption does happen from time to time.
 
-- `box_name` (string) - if your source_box is a boxfile that we need to add to Vagrant, this is
+- `box_name` (string) - if your "source_path" is a boxfile that we need to add to Vagrant, this is
   the name to give it. If left blank, will default to "packer_" plus your
   buildname.
 
@@ -52,7 +52,7 @@
 - `synced_folder` (string) - Path to the folder to be synced to the guest. The path can be absolute
   or relative to the directory Packer is being run from.
 
-- `skip_add` (bool) - Don't call "vagrant add" to add the box to your local environment; this
+- `skip_add` (bool) - Don't call "vagrant box add" to add the box to your local environment; this
   is necessary if you want to launch a box that is already added to your
   vagrant environment.
 
