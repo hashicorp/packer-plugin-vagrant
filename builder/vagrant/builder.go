@@ -109,7 +109,7 @@ type Config struct {
 	// Path to the folder to be synced to the guest. The path can be absolute
 	// or relative to the directory Packer is being run from.
 	SyncedFolder string `mapstructure:"synced_folder"`
-	// Don't call "vagrant add" to add the box to your local environment; this
+	// Don't call "vagrant box add" to add the box to your local environment; this
 	// is necessary if you want to launch a box that is already added to your
 	// vagrant environment.
 	SkipAdd bool `mapstructure:"skip_add" required:"false"`
