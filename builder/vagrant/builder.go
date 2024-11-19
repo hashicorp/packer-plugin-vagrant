@@ -56,7 +56,7 @@ type Config struct {
 	// vagrant global-status; your global_id will be a 7-digit number and
 	// letter combination that you'll find in the leftmost column of the
 	// global-status output.  If you choose to use global_id instead of
-	// source_box, Packer will skip the Vagrant initialize and add steps, and
+	// source_path, Packer will skip the Vagrant initialize and add steps, and
 	// simply launch the box directly using the global id.
 	GlobalID string `mapstructure:"global_id" required:"true"`
 	// The checksum for the .box file. The type of the checksum is specified
@@ -80,7 +80,7 @@ type Config struct {
 	// this is not recommended since these files can be very large and
 	// corruption does happen from time to time.
 	Checksum string `mapstructure:"checksum" required:"false"`
-	// if your source_box is a boxfile that we need to add to Vagrant, this is
+	// if your source_path is a boxfile that we need to add to Vagrant, this is
 	// the name to give it. If left blank, will default to "packer_" plus your
 	// buildname.
 	BoxName string `mapstructure:"box_name" required:"false"`
