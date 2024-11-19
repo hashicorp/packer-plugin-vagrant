@@ -30,7 +30,7 @@ setting the `teardown_method` option. You can change the behavior so the builder
 doesn't package it (not all provisioners support the `vagrant package` command)
 by setting the `skip package` option. You can also change the behavior so that
 rather than initializing a new Vagrant workspace, you use an already defined
-one, by using `global_id` instead of `source_box`.
+one, by using `global_id` instead of `source_path`.
 
 Please note that if you are using the Vagrant builder, then the Vagrant
 post-processor is unnecessary because the output of the Vagrant builder is
@@ -56,7 +56,7 @@ the Compress post-processor will not work with this builder.
   command `vagrant global-status`; your global_id will be a 7-digit number and
   letter combination that you'll find in the leftmost column of the
   global-status output. If you choose to use `global_id` instead of
-  `source_box`, Packer will skip the Vagrant initialize and add steps, and
+  `source_path`, Packer will skip the Vagrant initialize and add steps, and
   simply launch the box directly using the global id.
 
 ### Optional
