@@ -80,7 +80,7 @@ type Config struct {
 	// this is not recommended since these files can be very large and
 	// corruption does happen from time to time.
 	Checksum string `mapstructure:"checksum" required:"false"`
-	// if your source_path is a boxfile that we need to add to Vagrant, this is
+	// if your "source_path" is a boxfile that we need to add to Vagrant, this is
 	// the name to give it. If left blank, will default to "packer_" plus your
 	// buildname.
 	BoxName string `mapstructure:"box_name" required:"false"`
