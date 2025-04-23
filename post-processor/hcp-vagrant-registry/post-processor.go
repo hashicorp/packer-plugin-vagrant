@@ -15,6 +15,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -410,7 +411,7 @@ func metadataFromVagrantBox(boxfile string) (metadata map[string]interface{}, er
 			return nil, fmt.Errorf("Failed reading header info from box tar archive: %w", err)
 		}
 
-		if hdr.Name == "metadata.json" {
+		if path.Base(hdr.Name) == "metadata.json" {
 			var contents []byte
 			contents, err = io.ReadAll(tr)
 			if err != nil {

@@ -912,6 +912,64 @@ func TestPostProcessor(t *testing.T) {
 					c["no_direct_upload"] = false
 				},
 			},
+			{
+				desc: "OK - archive paths are relative",
+				stack: []stubResponse{
+					{
+						Method:     "POST",
+						Path:       "/oauth2/token",
+						Response:   `{"access_token": "TEST_TOKEN", "expiry": 0}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64",
+						Response:   `{}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64/version/0.5",
+						Response:   `{"version": {"state": "UNRELEASED"}}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64/version/0.5/provider/virtualbox",
+						Response:   `{}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64/version/0.5/provider/virtualbox/architecture/amd64",
+						Response:   `{}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "PUT",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64/version/0.5/provider/virtualbox/architecture/amd64",
+						Response:   `{}`,
+						StatusCode: 200,
+					},
+					{
+						Method:     "GET",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64/version/0.5/provider/virtualbox/architecture/amd64/upload",
+						Response:   fmt.Sprintf(`{"url": "%s"}`, uploadURL),
+						StatusCode: 200,
+					},
+					{
+						Method:     "PUT",
+						Path:       "/vagrant/2022-09-30/registry/hashicorp/box/precise64/version/0.5/release",
+						Response:   `{}`,
+						StatusCode: 200,
+					},
+				},
+				files: tarFiles{
+					{"./foo.txt", "This is a foo file"},
+					{"./bar.txt", "This is a bar file"},
+					{"./metadata.json", `{"provider": "virtualbox", "architecture": "amd64"}`},
+				},
+			},
 		}
 
 		for _, tc := range testCases {
