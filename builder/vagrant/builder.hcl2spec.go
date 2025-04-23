@@ -94,6 +94,7 @@ type FlatConfig struct {
 	Provider                  *string           `mapstructure:"provider" required:"false" cty:"provider" hcl:"provider"`
 	TeardownMethod            *string           `mapstructure:"teardown_method" required:"false" cty:"teardown_method" hcl:"teardown_method"`
 	BoxVersion                *string           `mapstructure:"box_version" required:"false" cty:"box_version" hcl:"box_version"`
+	BoxArchitecture           *string           `mapstructure:"box_architecture" required:"false" cty:"box_architecture" hcl:"box_architecture"`
 	Template                  *string           `mapstructure:"template" required:"false" cty:"template" hcl:"template"`
 	SyncedFolder              *string           `mapstructure:"synced_folder" cty:"synced_folder" hcl:"synced_folder"`
 	SkipAdd                   *bool             `mapstructure:"skip_add" required:"false" cty:"skip_add" hcl:"skip_add"`
@@ -204,6 +205,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"provider":                     &hcldec.AttrSpec{Name: "provider", Type: cty.String, Required: false},
 		"teardown_method":              &hcldec.AttrSpec{Name: "teardown_method", Type: cty.String, Required: false},
 		"box_version":                  &hcldec.AttrSpec{Name: "box_version", Type: cty.String, Required: false},
+		"box_architecture":             &hcldec.AttrSpec{Name: "box_architecture", Type: cty.String, Required: false},
 		"template":                     &hcldec.AttrSpec{Name: "template", Type: cty.String, Required: false},
 		"synced_folder":                &hcldec.AttrSpec{Name: "synced_folder", Type: cty.String, Required: false},
 		"skip_add":                     &hcldec.AttrSpec{Name: "skip_add", Type: cty.Bool, Required: false},
