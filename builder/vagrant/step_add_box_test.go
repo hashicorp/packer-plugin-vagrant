@@ -40,6 +40,14 @@ func TestPrepAddArgs(t *testing.T) {
 		},
 		{
 			Step: StepAddBox{
+				SourceBox:       "my_source_box",
+				Provider:        "virtualbox",
+				BoxArchitecture: "amd64",
+			},
+			Expected: []string{"my_source_box", "--architecture", "amd64", "--provider", "virtualbox"},
+		},
+		{
+			Step: StepAddBox{
 				BoxVersion:   "eleventyone",
 				CACert:       "adfasdf",
 				CAPath:       "adfasdf",
