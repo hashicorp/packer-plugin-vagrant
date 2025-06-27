@@ -22,6 +22,7 @@ type FlatConfig struct {
 	Include                      []string               `mapstructure:"include" cty:"include" hcl:"include"`
 	OutputPath                   *string                `mapstructure:"output" cty:"output" hcl:"output"`
 	Override                     map[string]interface{} `cty:"override" hcl:"override"`
+	VagrantfileContent           *string                `mapstructure:"vagrantfile_content" cty:"vagrantfile_content" hcl:"vagrantfile_content"`
 	VagrantfileTemplate          *string                `mapstructure:"vagrantfile_template" cty:"vagrantfile_template" hcl:"vagrantfile_template"`
 	VagrantfileTemplateGenerated *bool                  `mapstructure:"vagrantfile_template_generated" cty:"vagrantfile_template_generated" hcl:"vagrantfile_template_generated"`
 	ProviderOverride             *string                `mapstructure:"provider_override" cty:"provider_override" hcl:"provider_override"`
@@ -52,6 +53,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"include":                        &hcldec.AttrSpec{Name: "include", Type: cty.List(cty.String), Required: false},
 		"output":                         &hcldec.AttrSpec{Name: "output", Type: cty.String, Required: false},
 		"override":                       &hcldec.AttrSpec{Name: "override", Type: cty.Map(cty.String), Required: false},
+		"vagrantfile_content":            &hcldec.AttrSpec{Name: "vagrantfile_content", Type: cty.String, Required: false},
 		"vagrantfile_template":           &hcldec.AttrSpec{Name: "vagrantfile_template", Type: cty.String, Required: false},
 		"vagrantfile_template_generated": &hcldec.AttrSpec{Name: "vagrantfile_template_generated", Type: cty.Bool, Required: false},
 		"provider_override":              &hcldec.AttrSpec{Name: "provider_override", Type: cty.String, Required: false},

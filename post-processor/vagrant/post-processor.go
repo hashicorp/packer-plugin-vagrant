@@ -74,6 +74,7 @@ type Config struct {
 	Include                      []string `mapstructure:"include"`
 	OutputPath                   string   `mapstructure:"output"`
 	Override                     map[string]interface{}
+	VagrantfileContent           string `mapstructure:"vagrantfile_content"`
 	VagrantfileTemplate          string `mapstructure:"vagrantfile_template"`
 	VagrantfileTemplateGenerated bool   `mapstructure:"vagrantfile_template_generated"`
 	ProviderOverride             string `mapstructure:"provider_override"`
@@ -188,7 +189,9 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 
 	// Write our Vagrantfile
 	var customVagrantfile string
-	if config.VagrantfileTemplate != "" {
+	if config.VagrantfileContent != "" {
+		customVagrantfile = config.VagrantfileContent
+	} else if config.VagrantfileTemplate != "" {
 		ui.Message(fmt.Sprintf("Using custom Vagrantfile: %s", config.VagrantfileTemplate))
 		customBytes, err := ioutil.ReadFile(config.VagrantfileTemplate)
 		if err != nil {
@@ -292,6 +295,11 @@ func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
 	}
 
 	var errs *packersdk.MultiError
+	if c.VagrantfileContent != "" && c.VagrantfileTemplate != "" {
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf(
+			"You may either set vagrantfile_content or vagrantfile_template but not both"))
+	}
+
 	if c.VagrantfileTemplate != "" && c.VagrantfileTemplateGenerated == false {
 		_, err := os.Stat(c.VagrantfileTemplate)
 		if err != nil {
