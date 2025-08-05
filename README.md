@@ -20,7 +20,7 @@ Then, run [`packer init`](https://developer.hashicorp.com/packer/docs/commands/i
 packer {
   required_plugins {
     vagrant = {
-      version = ">= 1.1.0"
+      version = ">= 1.1.6"
       source  = "github.com/hashicorp/vagrant"
     }
   }
