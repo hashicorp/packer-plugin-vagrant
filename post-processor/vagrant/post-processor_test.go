@@ -202,6 +202,22 @@ func TestPostProcessorPrepare_vagrantfileTemplateExists(t *testing.T) {
 	}
 }
 
+func TestPostProcessorPrepare_vagrantfileContent(t *testing.T) {
+	c := testConfig()
+	c["vagrantfile_content"] = "Vagrant.configure('2') do |config|\nend\n"
+
+	var p PostProcessor
+
+	if err := p.Configure(c); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	c["vagrantfile_template"] = "Vagrantfile"
+	if err := p.Configure(c); err == nil {
+		t.Fatal("expected error since vagrantfile_content and vagrantfile_template are both set")
+	}
+}
+
 func TestPostProcessorPrepare_ProviderOverrideExists(t *testing.T) {
 	c := testConfig()
 	c["provider_override"] = "foo"
