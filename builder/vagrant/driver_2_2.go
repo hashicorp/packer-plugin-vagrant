@@ -10,7 +10,9 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/go-version"
@@ -74,17 +76,11 @@ func (d *Vagrant_2_2_Driver) Destroy(id string) error {
 
 // Calls "vagrant package"
 func (d *Vagrant_2_2_Driver) Package(args []string) error {
-	// Ideally we'd pass vagrantCWD into the package command but
-	// we have to change directory into the vagrant cwd instead in order to
-	// work around an upstream bug with the vagrant-libvirt plugin.
-	// We can stop doing this when
-	// https://github.com/vagrant-libvirt/vagrant-libvirt/issues/765
-	// is fixed.
-	oldDir, _ := os.Getwd()
-	_ = os.Chdir(d.VagrantCWD)
-	//nolint
-	defer os.Chdir(oldDir)
-	args = append(args, "--output", "package.box")
+	// Use default output path if not already provided
+	if !slices.Contains(args, "--output") {
+		outputPath = filepath.Join(d.VagrantCWD, "package.box")
+		args = append(args, "--output", outputPath)
+	}
 	_, _, err := d.vagrantCmd(append([]string{"package"}, args...)...)
 	return err
 }
