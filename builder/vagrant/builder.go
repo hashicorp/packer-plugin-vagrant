@@ -99,6 +99,8 @@ type Config struct {
 	TeardownMethod string `mapstructure:"teardown_method" required:"false"`
 	// What box version to use when initializing Vagrant.
 	BoxVersion string `mapstructure:"box_version" required:"false"`
+	// Architecture of the box to use when initializing Vagrant.
+	BoxArchitecture string `mapstructure:"box_architecture" required:"false"`
 	// a path to a golang template for a vagrantfile. Our default template can
 	// be found [here](https://github.com/hashicorp/packer-plugin-vagrant/blob/main/builder/vagrant/step_create_vagrantfile.go#L39-L54). The template variables available to you are
 	// `{{ .BoxName }}`, `{{ .SyncedFolder }}`, and `{{.InsertKey}}`, which
@@ -324,18 +326,19 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			InsertKey:    b.config.InsertKey,
 		},
 		&StepAddBox{
-			BoxVersion:   b.config.BoxVersion,
-			CACert:       b.config.AddCACert,
-			CAPath:       b.config.AddCAPath,
-			DownloadCert: b.config.AddCert,
-			Clean:        b.config.AddClean,
-			Force:        b.config.AddForce,
-			Insecure:     b.config.AddInsecure,
-			Provider:     b.config.Provider,
-			SourceBox:    b.config.SourceBox,
-			BoxName:      b.config.BoxName,
-			GlobalID:     b.config.GlobalID,
-			SkipAdd:      b.config.SkipAdd,
+			BoxArchitecture: b.config.BoxArchitecture,
+			BoxVersion:      b.config.BoxVersion,
+			CACert:          b.config.AddCACert,
+			CAPath:          b.config.AddCAPath,
+			DownloadCert:    b.config.AddCert,
+			Clean:           b.config.AddClean,
+			Force:           b.config.AddForce,
+			Insecure:        b.config.AddInsecure,
+			Provider:        b.config.Provider,
+			SourceBox:       b.config.SourceBox,
+			BoxName:         b.config.BoxName,
+			GlobalID:        b.config.GlobalID,
+			SkipAdd:         b.config.SkipAdd,
 		},
 		&StepUp{
 			TeardownMethod: b.config.TeardownMethod,
