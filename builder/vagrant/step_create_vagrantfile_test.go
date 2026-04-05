@@ -29,12 +29,12 @@ func TestCreateFile(t *testing.T) {
 	}
 	templatePath, err := testy.createVagrantfile()
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err)
 	}
 	defer os.Remove(templatePath)
 	contents, err := ioutil.ReadFile(templatePath)
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err)
 	}
 	actual := string(contents)
 	expected := `Vagrant.configure("2") do |config|
@@ -61,12 +61,12 @@ func TestCreateFile_customSync(t *testing.T) {
 	}
 	templatePath, err := testy.createVagrantfile()
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err)
 	}
 	defer os.Remove(templatePath)
 	contents, err := ioutil.ReadFile(templatePath)
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err)
 	}
 	actual := string(contents)
 	expected := `Vagrant.configure("2") do |config|
@@ -93,12 +93,12 @@ func TestCreateFile_InsertKeyTrue(t *testing.T) {
 	}
 	templatePath, err := testy.createVagrantfile()
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err)
 	}
 	defer os.Remove(templatePath)
 	contents, err := ioutil.ReadFile(templatePath)
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err)
 	}
 	actual := string(contents)
 	expected := `Vagrant.configure("2") do |config|
@@ -147,12 +147,12 @@ end`
 	}
 	templatePath, err := testy.createVagrantfile()
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err)
 	}
 	defer os.Remove(templatePath)
 	contents, err := ioutil.ReadFile(templatePath)
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err)
 	}
 	actual := string(contents)
 	expected := `Vagrant.configure("2") do |config|
