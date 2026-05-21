@@ -34,6 +34,7 @@ var builtins = map[string]string{
 	"mitchellh.virtualbox":                "virtualbox",
 	"mitchellh.vmware":                    "vmware",
 	"mitchellh.vmware-esx":                "vmware",
+	"vmware.desktop":                      "vmware",
 	"pearkes.digitalocean":                "digitalocean",
 	"packer.googlecompute":                "google",
 	"hashicorp.scaleway":                  "scaleway",
