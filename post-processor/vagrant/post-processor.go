@@ -1,4 +1,4 @@
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2013, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 //go:generate packer-sdc mapstructure-to-hcl2 -type Config
@@ -34,6 +34,7 @@ var builtins = map[string]string{
 	"mitchellh.virtualbox":                "virtualbox",
 	"mitchellh.vmware":                    "vmware",
 	"mitchellh.vmware-esx":                "vmware",
+	"vmware.desktop":                      "vmware",
 	"pearkes.digitalocean":                "digitalocean",
 	"packer.googlecompute":                "google",
 	"hashicorp.scaleway":                  "scaleway",
