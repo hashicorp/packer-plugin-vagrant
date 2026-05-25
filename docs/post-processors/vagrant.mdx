@@ -121,6 +121,12 @@ more details about certain options in following sections.
   creation of the Vagrantfile at some previous point in the build.
   Defaults to `false`.
 
+- `vagrantfile_content` (string) - Content of the custom Vagrantfile that is
+  packaged with the box. This option is intended to be used with
+  [`templatefile`](https://developer.hashicorp.com/packer/docs/templates/hcl_templates/functions/file/templatefile)
+  function in HCL templates, instead of `vagrantfile_template`.
+  `vagrantfile_content` and `vagrantfile_template` can't be set both at the same time.
+
 ## Using together with the Artifice post-processor
 
 Sometimes you may want to run several builds in a pipeline rather than running
