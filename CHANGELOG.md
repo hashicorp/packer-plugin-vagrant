@@ -1,3 +1,16 @@
+## 1.1.7 (May 25, 2026)
+
+## What's Changed
+
+### IMPROVEMENTS:
+* Add new builder id for VMware [GH-151](https://github.com/hashicorp/packer-plugin-vagrant/pull/151)
+
+### Other Changes
+* Bump Go version to 1.25.10 [GH-153](https://github.com/hashicorp/packer-plugin-vagrant/pull/153)
+* Bump `github.com/hashicorp/packer-plugin-sdk` to v0.6.9 [GH-153](https://github.com/hashicorp/packer-plugin-vagrant/pull/153)
+* Migrate golangci-lint to v2 and refresh dependencies [GH-153](https://github.com/hashicorp/packer-plugin-vagrant/pull/153) [GH-146](https://github.com/hashicorp/packer-plugin-vagrant/pull/146)
+* Add/Update Copyright Headers [GH-149](https://github.com/hashicorp/packer-plugin-vagrant/pull/149) [GH-144](https://github.com/hashicorp/packer-plugin-vagrant/pull/144)
+
 ## 1.1.6 (August 5, 2025)
 
 ### IMPROVEMENTS:
