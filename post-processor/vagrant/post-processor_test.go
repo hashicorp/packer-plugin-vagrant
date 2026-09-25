@@ -202,6 +202,40 @@ func TestPostProcessorPrepare_vagrantfileTemplateExists(t *testing.T) {
 	}
 }
 
+// write unit test to cover vagrantfile_template_content but vagrantfile_template is not set
+func TestPostProcessorPrepare_vagrantfileTemplateContentExists(t *testing.T) {
+	f, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	name := f.Name()
+
+	c := testConfig()
+	c["vagrantfile_template"] = name
+	c["vagrantfile_template_content"] = "content"
+
+	if err := f.Close(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	var p PostProcessor
+
+	if err := p.Configure(c); err != nil {
+		t.Fatal("Should not have errored since vagrantfile_template and vagrantfile_template_content both exist")
+	}
+
+	if err := os.Remove(name); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	c = testConfig()
+	c["vagrantfile_template_content"] = "content"
+
+	if err := p.Configure(c); err == nil {
+		t.Fatal("Should have errored since vagrantfile_template_content exists but vagrantfile_template is not set")
+	}
+}
+
 func TestPostProcessorPrepare_ProviderOverrideExists(t *testing.T) {
 	c := testConfig()
 	c["provider_override"] = "foo"
