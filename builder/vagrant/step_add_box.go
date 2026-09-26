@@ -14,18 +14,19 @@ import (
 )
 
 type StepAddBox struct {
-	BoxVersion   string
-	CACert       string
-	CAPath       string
-	DownloadCert string
-	Clean        bool
-	Force        bool
-	Insecure     bool
-	Provider     string
-	SourceBox    string
-	BoxName      string
-	GlobalID     string
-	SkipAdd      bool
+	BoxArchitecture string
+	BoxVersion      string
+	CACert          string
+	CAPath          string
+	DownloadCert    string
+	Clean           bool
+	Force           bool
+	Insecure        bool
+	Provider        string
+	SourceBox       string
+	BoxName         string
+	GlobalID        string
+	SkipAdd         bool
 }
 
 func (s *StepAddBox) generateAddArgs() []string {
@@ -36,6 +37,10 @@ func (s *StepAddBox) generateAddArgs() []string {
 	}
 
 	addArgs = append(addArgs, s.SourceBox)
+
+	if s.BoxArchitecture != "" {
+		addArgs = append(addArgs, "--architecture", s.BoxArchitecture)
+	}
 
 	if s.BoxVersion != "" {
 		addArgs = append(addArgs, "--box-version", s.BoxVersion)
